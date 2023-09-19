@@ -18,20 +18,21 @@ public class HurtBox : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.green;
+        Gizmos.color = new Color(0, 1, 0, 0.25f);
 
         Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.localScale);
 
-        Gizmos.DrawCube(Vector3.zero, new Vector3(1, 1, 1));
+        Gizmos.DrawWireCube(Vector3.zero, new Vector3(1,1,1));
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        getHit(0);
+        getHit(1);
     }
 
     public void getHit(int damage)
     {
-        print("Hurt for " + damage + " damage.");
+        Dummy parent = GetComponentInParent<Dummy>();
+        parent.reduceHP(damage);
     }
 }
