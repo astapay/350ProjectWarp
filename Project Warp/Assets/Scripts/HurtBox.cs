@@ -30,14 +30,19 @@ public class HurtBox : MonoBehaviour
     // </summary>
     private void OnDrawGizmos()
     {
-        // We need the position and size of our hurtbox first
-        Vector2 position = GetComponent<BoxCollider2D>().offset;
-        Vector2 boxSize = GetComponent<BoxCollider2D>().size;
+        BoxCollider2D[] boxColliders = GetComponents<BoxCollider2D>();
 
-        // We now use these values to draw a simple wire cube in the Scene
-        Gizmos.color = Color.green;
-        Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.localScale);
-        Gizmos.DrawWireCube(position, boxSize);
+        for (int i = 0; i < boxColliders.Length; i++)
+        {
+            // We need the position and size of our hurtbox first
+            Vector2 position = boxColliders[i].offset;
+            Vector2 boxSize = boxColliders[i].size;
+
+            // We now use these values to draw a simple wire cube in the Scene
+            Gizmos.color = Color.green;
+            Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.localScale);
+            Gizmos.DrawWireCube(position, boxSize);
+        }
     }
 
     // <summary>

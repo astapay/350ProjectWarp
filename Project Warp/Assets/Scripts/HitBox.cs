@@ -32,36 +32,101 @@ public class HitBox : MonoBehaviour
         // Keep in mind that these are temporary
         switch (type)
         {
-            case 1:
+            case 1: //5N
                 {
-                    xOffset = 1;
+                    xOffset = 0.2f;
+                    yOffset = 0.1f;
+                    xSize = 0.4f;
+                    ySize = 0.25f;
+                }
+                break;
+            case 2: //5NN
+            case 8: //6NN
+                {
+                    xOffset = 0.25f;
+                    yOffset = 0.26f;
+                    xSize = 0.3f;
+                    ySize = 0.45f;
+                }
+                break;
+            case 3: //5NNN
+                {
+                    xOffset = 0.35f;
+                    yOffset = 0.15f;
+                    xSize = 0.35f;
+                    ySize = 0.5f;
+                }
+                break;
+            case 4: //2N
+                {
+                    xOffset = 0.3f;
+                    yOffset = -0.4f;
+                    xSize = 0.35f;
+                    ySize = 0.2f;
+                }
+                break;
+            case 5: //2NN
+                {
+                    xOffset = 0.35f;
+                    yOffset = -0.35f;
+                    xSize = 0.35f;
+                    ySize = 0.25f;
+                }
+                break;
+            case 6: //2NNN
+                {
+                    xOffset = 0.25f;
+                    yOffset = 0.3f;
+                    xSize = 0.35f;
+                    ySize = 0.45f;
+                }
+                break;
+            case 7: //6N
+                {
+                    xOffset = 0;
                     yOffset = 0;
                     xSize = 1;
-                    ySize = 0.5f;
+                    ySize = 1;
                 }
                 break;
-            case 2:
+            case 9: //6NNN
                 {
-                    xOffset = 1;
-                    yOffset = -0.5f;
-                    xSize = 1;
-                    ySize = 0.5f;
-                }
-                break;
-            case 3:
-                {
-                    xOffset = 1;
-                    yOffset = 0.5f;
-                    xSize = 1;
-                    ySize = 0.5f;
-                }
-                break;
-            case 4:
-                {
-                    xOffset = 1;
+                    xOffset = 0;
                     yOffset = 0;
                     xSize = 1;
-                    ySize = 0.5f;
+                    ySize = 1;
+                }
+                break;
+            case 10: //j.N
+                {
+                    xOffset = 0.35f;
+                    yOffset = 0.05f;
+                    xSize = 0.3f;
+                    ySize = 0.2f;
+                }
+                break;
+            case 11: //j.NN
+                {
+                    xOffset = 0.3f;
+                    yOffset = -0.15f;
+                    xSize = 0.45f;
+                    ySize = 0.3f;
+                }
+                break;
+            case 12: //j.NNN/j.6N
+                {
+                    xOffset = 0.4f;
+                    yOffset = -0.25f;
+                    xSize = 0.3f;
+                    ySize = 0.3f;
+                }
+                break;
+            default:
+                {
+                    xOffset = 0;
+                    yOffset = 0;
+                    xSize = 0;
+                    ySize = 0;
                 }
                 break;
         }

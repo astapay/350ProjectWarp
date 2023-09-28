@@ -28,6 +28,16 @@ public struct Attack
     public int startupFrames;
     public int activeFrames;
     public int recoveryFrames;
+
+    // Properties on hit
+    public int damage;
+    public int hitstun;
+
+    // Other properties
+    public bool overhead;
+    public bool low;
+    public bool invulnerableHead;
+    public bool invulnerableAll;
 }
 
 public class PlayerController : MonoBehaviour
@@ -66,6 +76,7 @@ public class PlayerController : MonoBehaviour
     private int startupFrameCounter;
     private int activeFrameCounter;
     private int recoveryFrameCounter;
+    private Vector3 saveTransform;
 
     // A counter to keep track of the next sprite to play
     private int currentSprite;
@@ -140,6 +151,7 @@ public class PlayerController : MonoBehaviour
         startupFrameCounter = 0;
         activeFrameCounter = 0;
         recoveryFrameCounter = 0;
+        saveTransform = transform.position;
 
         // Start the sprite counter
         currentSprite = 0;
@@ -154,82 +166,118 @@ public class PlayerController : MonoBehaviour
     // </summary>
     private void SetUpAttacks()
     {
-        //5N frame data
+        //5N
         attacks[1].startupFrames = 6;
         attacks[1].activeFrames = 3;
         attacks[1].recoveryFrames = 10;
+        attacks[1].damage = 1;
+        attacks[1].hitstun = 5;
+        attacks[1].overhead = false;
+        attacks[1].low = false;
+        attacks[1].invulnerableHead = false;
+        attacks[1].invulnerableAll = false;
 
-        //5NN frame data
-        attacks[2].startupFrames = 7;
-        attacks[2].activeFrames = 6;
+        //5NN
+        attacks[2].startupFrames = 8;
+        attacks[2].activeFrames = 5;
         attacks[2].recoveryFrames = 19;
+        attacks[2].damage = 3;
+        attacks[2].hitstun = 8;
+        attacks[2].overhead = false;
+        attacks[2].low = false;
+        attacks[2].invulnerableHead = false;
+        attacks[2].invulnerableAll = false;
 
-        //5NNN frame data
-        attacks[3].startupFrames = 12;
-        attacks[3].activeFrames = 10;
+        //5NNN
+        attacks[3].startupFrames = 14;
+        attacks[3].activeFrames = 8;
         attacks[3].recoveryFrames = 21;
+        attacks[3].damage = 7;
+        attacks[3].hitstun = 20;
+        attacks[3].overhead = false;
+        attacks[3].low = false;
+        attacks[3].invulnerableHead = false;
+        attacks[3].invulnerableAll = false;
 
-        //2N frame data
-        attacks[4].startupFrames = 7;
-        attacks[4].activeFrames = 3;
+        //2N
+        attacks[4].startupFrames = 8;
+        attacks[4].activeFrames = 2;
         attacks[4].recoveryFrames = 14;
+        attacks[4].damage = 2;
+        attacks[4].hitstun = 6;
+        attacks[4].overhead = false;
+        attacks[4].low = true;
+        attacks[4].invulnerableHead = false;
+        attacks[4].invulnerableAll = false;
 
-        //2NN frame data
-        attacks[5].startupFrames = 11;
-        attacks[5].activeFrames = 6;
+        //2NN
+        attacks[5].startupFrames = 12;
+        attacks[5].activeFrames = 5;
         attacks[5].recoveryFrames = 18;
+        attacks[5].damage = 3;
+        attacks[5].hitstun = 9;
+        attacks[5].overhead = false;
+        attacks[5].low = true;
+        attacks[5].invulnerableHead = false;
+        attacks[5].invulnerableAll = false;
 
-        //2NNN frame data
-        attacks[6].startupFrames = 13;
+        //2NNN
+        attacks[6].startupFrames = 14;
         attacks[6].activeFrames = 3;
-        attacks[6].recoveryFrames = 21;
+        attacks[6].recoveryFrames = 20;
+        attacks[6].damage = 7;
+        attacks[6].hitstun = 20;
+        attacks[6].overhead = false;
+        attacks[6].low = false;
+        attacks[6].invulnerableHead = true;
+        attacks[6].invulnerableAll = false;
 
-        //6N frame data
+        //6N
         attacks[7].startupFrames = 20;
         attacks[7].activeFrames = 6;
         attacks[7].recoveryFrames = 4;
 
-        //6NN frame data
+        //6NN
         attacks[8].startupFrames = 7;
         attacks[8].activeFrames = 6;
         attacks[8].recoveryFrames = 19;
 
-        //6NNN frame data
+        //6NNN
         attacks[9].startupFrames = 24;
         attacks[9].activeFrames = 1;
         attacks[9].recoveryFrames = 26;
 
-        //j.N frame data
-        attacks[10].startupFrames = 7;
-        attacks[10].activeFrames = 4;
+        //j.N
+        attacks[10].startupFrames = 8;
+        attacks[10].activeFrames = 3;
         attacks[10].recoveryFrames = 8;
 
-        //j.NN frame data
-        attacks[11].startupFrames = 8;
-        attacks[11].activeFrames = 2;
+        //j.NN
+        attacks[11].startupFrames = 7;
+        attacks[11].activeFrames = 3;
         attacks[11].recoveryFrames = 13;
 
-        //j.NNN/j.6N frame data
+        //j.NNN
         attacks[12].startupFrames = 13;
         attacks[12].activeFrames = 4;
         attacks[12].recoveryFrames = 19;
 
-        //5S frame data
+        //5S
         attacks[13].startupFrames = 11;
         attacks[13].activeFrames = 1;
         attacks[13].recoveryFrames = 6;
 
-        //2S frame data
+        //2S
         attacks[14].startupFrames = 9;
         attacks[14].activeFrames = 17;
         attacks[14].recoveryFrames = 46;
 
-        //6S frame data
+        //6S
         attacks[15].startupFrames = 13;
         attacks[15].activeFrames = 14;
         attacks[15].recoveryFrames = 15;
 
-        //4S frame data
+        //4S
         attacks[16].startupFrames = 4;
         attacks[16].activeFrames = 25;
         attacks[16].recoveryFrames = 15;
@@ -301,6 +349,8 @@ public class PlayerController : MonoBehaviour
         // If startup is over, we begin drawing the hitbox
         if (startupFrameCounter == 0)
         {
+            hitBox.StopHitBox();
+
             // Begin drawing the hitbox for the attack
             hitBox.StartHitBox(attackType);
 
@@ -336,6 +386,7 @@ public class PlayerController : MonoBehaviour
         {
             // Reset the RigidBody2D constraints
             gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeRotation;
+            transform.position = saveTransform;
         }
     }
 
@@ -347,6 +398,8 @@ public class PlayerController : MonoBehaviour
     // </summary>
     private void UpdateAnimation()
     {
+        saveTransform = transform.position;
+
         // Increment our sprite counter
         currentSprite++;
 
@@ -367,6 +420,7 @@ public class PlayerController : MonoBehaviour
                     {
                         currentSprite %= standNSprites.Length;
                         s = standNSprites[currentSprite];
+                        transform.position = new Vector3(saveTransform.x + 0.155f, saveTransform.y, saveTransform.z);
                     }
                     break;
                 case 2: //5NN
@@ -374,12 +428,14 @@ public class PlayerController : MonoBehaviour
                     {
                         currentSprite %= standNNSprites.Length;
                         s = standNNSprites[currentSprite];
+                        transform.position = new Vector3(saveTransform.x + 0.155f, saveTransform.y, saveTransform.z);
                     }
                     break;
                 case 3: //5NNN
                     {
                         currentSprite %= standNNNSprites.Length;
                         s = standNNNSprites[currentSprite];
+                        transform.position = new Vector3(saveTransform.x + 0.155f, saveTransform.y, saveTransform.z);
                     }
                     break;
                 case 4: //2N
@@ -746,9 +802,12 @@ public class PlayerController : MonoBehaviour
     {
         // If we are no longer colliding with the ground,
         // then we are not grounded
+        // and there are no walls to impede movement
         if (collision.gameObject.tag == "Ground")
         {
             isGrounded = false;
+            canMoveLeft = true;
+            canMoveRight = true;
         }
     }
 
@@ -852,6 +911,10 @@ public class PlayerController : MonoBehaviour
     {
         // We will simply draw a cube around the Dummy's pushbox
         Gizmos.color = Color.white;
-        Gizmos.DrawWireCube(transform.position, new Vector3(0.75f, 1, 1));
+
+        Vector3 boxPos = GetComponent<BoxCollider2D>().bounds.center;
+        Vector3 boxSize = GetComponent<BoxCollider2D>().size;
+
+        Gizmos.DrawWireCube(boxPos, boxSize);
     }
 }

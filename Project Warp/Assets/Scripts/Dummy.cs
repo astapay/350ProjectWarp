@@ -97,6 +97,10 @@ public class Dummy : MonoBehaviour
     {
         // We will simply draw a cube around the Dummy's pushbox
         Gizmos.color = Color.white;
-        Gizmos.DrawWireCube(transform.position, new Vector3(1, 1, 1));
+
+        Vector3 boxPos = GetComponent<BoxCollider2D>().bounds.center;
+        Vector3 boxSize = GetComponent<BoxCollider2D>().size;
+
+        Gizmos.DrawWireCube(boxPos, boxSize);
     }
 }
