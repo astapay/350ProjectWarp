@@ -15,11 +15,8 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class Dummy : MonoBehaviour
+public class Dummy : FighterController
 {
-    // Our HP value for the enemy
-    private int hp;
-
     // The sprites for the death animation,
     // and a variable to keep track of which sprite we play next
     private int currentSprite;
@@ -27,6 +24,7 @@ public class Dummy : MonoBehaviour
 
     // <summary>
     // Start is called before the first frame update
+    // Initializes the Dummy's HP and sprite counter
     // </summary>
     void Start()
     {
@@ -37,6 +35,7 @@ public class Dummy : MonoBehaviour
 
     // <summary>
     // Update is called once per frame
+    // Handles what happens when the Dummy dies
     // </summary>
     void Update()
     {
@@ -70,23 +69,6 @@ public class Dummy : MonoBehaviour
 
         // Render the updated sprite through the SpriteRenderer
         gameObject.GetComponent<SpriteRenderer>().sprite = deathSprites[currentSprite];
-    }
-
-    // <summary>
-    // Reduces our HP
-    // Used by HurtBox when taking damage
-    // </summary>
-    // <param name="damage"> The amount of damage we take from the attack
-    public void ReduceHP(int damage)
-    {
-        // Reduce our HP
-        hp -= damage;
-
-        // If we have overkill damage, set our HP to 0
-        if(hp < 0)
-        {
-            hp = 0;
-        }
     }
 
     // <summary>

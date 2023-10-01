@@ -9,10 +9,13 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
 
 public class HurtBox : MonoBehaviour
 {
+    [SerializeField] private GameManager gm;
+
     // <summary>
     // Handles any damage taken from a collision with a hitbox
     // The code in this method is temporary
@@ -20,7 +23,8 @@ public class HurtBox : MonoBehaviour
     // <param name="damage"> The amount of damage we take from the hit </param>
     public void GetHit(int damage)
     {
-        Dummy parent = GetComponentInParent<Dummy>();
+        FighterController parent = GetComponentInParent<FighterController>();
+
         parent.ReduceHP(damage);
     }
 
@@ -56,5 +60,7 @@ public class HurtBox : MonoBehaviour
     {
         //Handle our damage
         GetHit(1);
+
+        gm.FreezeTime(5);
     }
 }

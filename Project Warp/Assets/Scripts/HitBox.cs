@@ -20,7 +20,7 @@ public class HitBox : MonoBehaviour
     // When called, begins drawing a hitbox depending on the input attack
     // </summary>
     // <param name="type"> The attack in question in the form of an int </param>
-    public void StartHitBox(int type)
+    public void StartHitBox(int type, bool facingRight)
     {
         // Offset and size values for our hitbox
         float xOffset = 0;
@@ -121,6 +121,22 @@ public class HitBox : MonoBehaviour
                     ySize = 0.3f;
                 }
                 break;
+            case 17: // HUND bite
+                {
+                    xOffset = 0.55f;
+                    yOffset = 0.15f;
+                    xSize = 0.35f;
+                    ySize = 0.45f;
+                }
+                break;
+            case 18: // HUND pounce
+                {
+                    xOffset = 0;
+                    yOffset = 0;
+                    xSize = 1;
+                    ySize = 1;
+                }
+                break;
             default:
                 {
                     xOffset = 0;
@@ -129,6 +145,12 @@ public class HitBox : MonoBehaviour
                     ySize = 0;
                 }
                 break;
+        }
+
+        // Now, we need to account for which direction the character is facing
+        if (!facingRight)
+        {
+            xOffset *= -1;
         }
 
         // Now, we apply our values to the attached BoxCollider2D

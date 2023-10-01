@@ -18,29 +18,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
-// <summary>
-// A struct that we will use to store information
-// for each attack our character does
-// </summary>
-public struct Attack
-{
-    // Frame data
-    public int startupFrames;
-    public int activeFrames;
-    public int recoveryFrames;
-
-    // Properties on hit
-    public int damage;
-    public int hitstun;
-
-    // Other properties
-    public bool overhead;
-    public bool low;
-    public bool invulnerableHead;
-    public bool invulnerableAll;
-}
-
-public class PlayerController : MonoBehaviour
+public class PlayerController : FighterController
 {
     // Variables for input from the user
     [SerializeField] private PlayerInput playerInput;
@@ -58,8 +36,10 @@ public class PlayerController : MonoBehaviour
 
     // Bool values that will determine what the
     // character can or can't do
+    private bool facingRight;
     private bool canMoveLeft;
     private bool canMoveRight;
+    private bool canAttack;
     private bool isMoving;
     private bool isCrouching;
     private bool isAttacking;
@@ -69,14 +49,11 @@ public class PlayerController : MonoBehaviour
     // Includes out hitbox, hurtbox, and array of Attacks
     // As well as counters to keep track of frames
     [SerializeField] private HitBox hitBox;
-    [SerializeField] private HurtBox hurtBox;
-    private Attack[] attacks;
     private int nChain;
     private int attackType;
     private int startupFrameCounter;
     private int activeFrameCounter;
     private int recoveryFrameCounter;
-    private Vector3 saveTransform;
 
     // A counter to keep track of the next sprite to play
     private int currentSprite;
@@ -108,6 +85,7 @@ public class PlayerController : MonoBehaviour
 
     // <summary>
     // Start is called before the first frame update
+    // Initializes all of our private variables
     // </summary>
     void Start()
     {
@@ -137,154 +115,35 @@ public class PlayerController : MonoBehaviour
         crouch.canceled += Handle_CrouchEnd;
 
         // Initialize booleans
+        facingRight = true;
         canMoveLeft = true;
         canMoveRight = true;
+        canAttack = true;
         isMoving = false;
         isCrouching = false;
         isAttacking = false;
         isGrounded = true;
 
         //Initialize attack-related data
-        attacks = new Attack[17];
         nChain = 0;
         attackType = 0;
         startupFrameCounter = 0;
         activeFrameCounter = 0;
         recoveryFrameCounter = 0;
-        saveTransform = transform.position;
 
         // Start the sprite counter
         currentSprite = 0;
 
-        // Fill the Attack array
+        // Initialize superclass variables
+        hp = 25;
         SetUpAttacks();
     }
 
     // <summary>
-    // Fills our Attack array with appropriate frame data
-    // More aspects of each Attack will be added at a later date
-    // </summary>
-    private void SetUpAttacks()
-    {
-        //5N
-        attacks[1].startupFrames = 6;
-        attacks[1].activeFrames = 3;
-        attacks[1].recoveryFrames = 10;
-        attacks[1].damage = 1;
-        attacks[1].hitstun = 5;
-        attacks[1].overhead = false;
-        attacks[1].low = false;
-        attacks[1].invulnerableHead = false;
-        attacks[1].invulnerableAll = false;
-
-        //5NN
-        attacks[2].startupFrames = 8;
-        attacks[2].activeFrames = 5;
-        attacks[2].recoveryFrames = 19;
-        attacks[2].damage = 3;
-        attacks[2].hitstun = 8;
-        attacks[2].overhead = false;
-        attacks[2].low = false;
-        attacks[2].invulnerableHead = false;
-        attacks[2].invulnerableAll = false;
-
-        //5NNN
-        attacks[3].startupFrames = 14;
-        attacks[3].activeFrames = 8;
-        attacks[3].recoveryFrames = 21;
-        attacks[3].damage = 7;
-        attacks[3].hitstun = 20;
-        attacks[3].overhead = false;
-        attacks[3].low = false;
-        attacks[3].invulnerableHead = false;
-        attacks[3].invulnerableAll = false;
-
-        //2N
-        attacks[4].startupFrames = 8;
-        attacks[4].activeFrames = 2;
-        attacks[4].recoveryFrames = 14;
-        attacks[4].damage = 2;
-        attacks[4].hitstun = 6;
-        attacks[4].overhead = false;
-        attacks[4].low = true;
-        attacks[4].invulnerableHead = false;
-        attacks[4].invulnerableAll = false;
-
-        //2NN
-        attacks[5].startupFrames = 12;
-        attacks[5].activeFrames = 5;
-        attacks[5].recoveryFrames = 18;
-        attacks[5].damage = 3;
-        attacks[5].hitstun = 9;
-        attacks[5].overhead = false;
-        attacks[5].low = true;
-        attacks[5].invulnerableHead = false;
-        attacks[5].invulnerableAll = false;
-
-        //2NNN
-        attacks[6].startupFrames = 14;
-        attacks[6].activeFrames = 3;
-        attacks[6].recoveryFrames = 20;
-        attacks[6].damage = 7;
-        attacks[6].hitstun = 20;
-        attacks[6].overhead = false;
-        attacks[6].low = false;
-        attacks[6].invulnerableHead = true;
-        attacks[6].invulnerableAll = false;
-
-        //6N
-        attacks[7].startupFrames = 20;
-        attacks[7].activeFrames = 6;
-        attacks[7].recoveryFrames = 4;
-
-        //6NN
-        attacks[8].startupFrames = 7;
-        attacks[8].activeFrames = 6;
-        attacks[8].recoveryFrames = 19;
-
-        //6NNN
-        attacks[9].startupFrames = 24;
-        attacks[9].activeFrames = 1;
-        attacks[9].recoveryFrames = 26;
-
-        //j.N
-        attacks[10].startupFrames = 8;
-        attacks[10].activeFrames = 3;
-        attacks[10].recoveryFrames = 8;
-
-        //j.NN
-        attacks[11].startupFrames = 7;
-        attacks[11].activeFrames = 3;
-        attacks[11].recoveryFrames = 13;
-
-        //j.NNN
-        attacks[12].startupFrames = 13;
-        attacks[12].activeFrames = 4;
-        attacks[12].recoveryFrames = 19;
-
-        //5S
-        attacks[13].startupFrames = 11;
-        attacks[13].activeFrames = 1;
-        attacks[13].recoveryFrames = 6;
-
-        //2S
-        attacks[14].startupFrames = 9;
-        attacks[14].activeFrames = 17;
-        attacks[14].recoveryFrames = 46;
-
-        //6S
-        attacks[15].startupFrames = 13;
-        attacks[15].activeFrames = 14;
-        attacks[15].recoveryFrames = 15;
-
-        //4S
-        attacks[16].startupFrames = 4;
-        attacks[16].activeFrames = 25;
-        attacks[16].recoveryFrames = 15;
-    }
-
-    // <summary>
     // Update is called once per frame
+    // Used to update information about
+    // the character, including
+    // playing animations, keeping track of attacking frames, movement, etc
     // <summary>
     void Update()
     {
@@ -299,15 +158,6 @@ public class PlayerController : MonoBehaviour
         if (transform.position.y < -4)
         {
             transform.position = new Vector3(14, 1, 0);
-        }
-
-        // If all of our attack frame counters are below 0,
-        // then we surely aren't attacking
-        if (startupFrameCounter <= 0 && activeFrameCounter <= 0 && recoveryFrameCounter <= 0)
-        {
-            isAttacking = false;
-            attackType = 0;
-            nChain = 0;
         }
 
         // Movement if statements
@@ -350,9 +200,10 @@ public class PlayerController : MonoBehaviour
         if (startupFrameCounter == 0)
         {
             hitBox.StopHitBox();
+            UndoAdjustTransform();
 
             // Begin drawing the hitbox for the attack
-            hitBox.StartHitBox(attackType);
+            hitBox.StartHitBox(attackType, facingRight);
 
             // Set our active frame counter to keep track of
             // how long the hitbox exists for
@@ -364,6 +215,11 @@ public class PlayerController : MonoBehaviour
 
         // Reduce our active frames
         activeFrameCounter--;
+
+        if (attackType != 0 && activeFrameCounter == attacks[attackType].activeFrames - 1)
+        {
+            canAttack = true;
+        }
 
         // If active frames are over, we must stop drawing the hitbox
         if (activeFrameCounter == 0)
@@ -386,7 +242,12 @@ public class PlayerController : MonoBehaviour
         {
             // Reset the RigidBody2D constraints
             gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeRotation;
-            transform.position = saveTransform;
+            UndoAdjustTransform();
+
+            canAttack = true;
+            isAttacking = false;
+            attackType = 0;
+            nChain = 0;
         }
     }
 
@@ -398,8 +259,6 @@ public class PlayerController : MonoBehaviour
     // </summary>
     private void UpdateAnimation()
     {
-        saveTransform = transform.position;
-
         // Increment our sprite counter
         currentSprite++;
 
@@ -420,7 +279,15 @@ public class PlayerController : MonoBehaviour
                     {
                         currentSprite %= standNSprites.Length;
                         s = standNSprites[currentSprite];
-                        transform.position = new Vector3(saveTransform.x + 0.155f, saveTransform.y, saveTransform.z);
+
+                        if (facingRight)
+                        {
+                            AdjustTransform(0.155f, 0);
+                        }
+                        else
+                        {
+                            AdjustTransform(-0.155f, 0);
+                        }
                     }
                     break;
                 case 2: //5NN
@@ -428,14 +295,30 @@ public class PlayerController : MonoBehaviour
                     {
                         currentSprite %= standNNSprites.Length;
                         s = standNNSprites[currentSprite];
-                        transform.position = new Vector3(saveTransform.x + 0.155f, saveTransform.y, saveTransform.z);
+
+                        if (facingRight)
+                        {
+                            AdjustTransform(0.155f, 0);
+                        }
+                        else
+                        {
+                            AdjustTransform(-0.155f, 0);
+                        }
                     }
                     break;
                 case 3: //5NNN
                     {
                         currentSprite %= standNNNSprites.Length;
                         s = standNNNSprites[currentSprite];
-                        transform.position = new Vector3(saveTransform.x + 0.155f, saveTransform.y, saveTransform.z);
+
+                        if (facingRight)
+                        {
+                            AdjustTransform(0.155f, 0);
+                        }
+                        else
+                        {
+                            AdjustTransform(-0.155f, 0);
+                        }
                     }
                     break;
                 case 4: //2N
@@ -505,8 +388,9 @@ public class PlayerController : MonoBehaviour
                     }
                     break;
                 // If we somehow find a different attack,
-                // Simply play the null sprite
+                // Simply play the Animator again
                 default:
+                    gameObject.GetComponent<Animator>().enabled = true;
                     break;
             }
         }
@@ -557,6 +441,16 @@ public class PlayerController : MonoBehaviour
         {
             currentSprite %= walkSprites.Length;
             s = walkSprites[currentSprite];
+
+            // We also need to update which direction we are looking
+            if (facingRight)
+            {
+                gameObject.GetComponent<SpriteRenderer>().flipX = false;
+            }
+            else
+            {
+                gameObject.GetComponent<SpriteRenderer>().flipX = true;
+            }
         }
         // Finally, if the rest fail,
         // we turn on the Animator for the idle animation
@@ -568,6 +462,11 @@ public class PlayerController : MonoBehaviour
         // Apply the chosen sprite to the SpriteRenderer
         // (If s is null and the Animator is enabled, nothing happens)
         gameObject.GetComponent<SpriteRenderer>().sprite = s;
+
+        if(attackType > 0)
+        {
+            EditorApplication.isPaused = true;
+        }
     }
 
     // <summary>
@@ -603,6 +502,26 @@ public class PlayerController : MonoBehaviour
         if(!isCrouching)
         {
             isMoving = true;
+        }
+
+        // We need to turn around if we are trying to move in a new direction
+        float moveDir = move.ReadValue<float>();
+
+        if (moveDir < 0)
+        {
+            if (facingRight)
+            {
+                InvertHurtboxes();
+                facingRight = false;
+            }
+        }
+        else if (moveDir > 0)
+        {
+            if (!facingRight)
+            {
+                InvertHurtboxes();
+                facingRight = true;
+            }
         }
     }
 
@@ -653,42 +572,46 @@ public class PlayerController : MonoBehaviour
         // If we have done too many in a row, we can't do it again
         if (nChain < 3)
         {
-            // Now, we need to determine which attack to perform
-            // We will default to our standing normals
-            attackType = 1;
-
-            // First, we will check for aerials
-            if (!isGrounded)
+            if(canAttack)
             {
-                attackType = 10;
+                // Now, we need to determine which attack to perform
+                // We will default to our standing normals
+                attackType = 1;
+
+                // First, we will check for aerials
+                if (!isGrounded)
+                {
+                    attackType = 10;
+                }
+                // Then, lows
+                else if (isCrouching)
+                {
+                    attackType = 4;
+                }
+                // Finally, forwards
+                else if (isMoving)
+                {
+                    attackType = 7;
+                }
+
+                // We can modify which attack in the string
+                // to do based on nChain
+                attackType += nChain;
+
+                // We need to begin our startup frames
+                startupFrameCounter = attacks[attackType].startupFrames;
+
+                // Reset our sprite counter
+                currentSprite = -1;
+
+                // We are obviously now attacking
+                canAttack = false;
+                isAttacking = true;
+
+                // Increment nChain to keep track of how
+                // many normals we've done
+                nChain++;
             }
-            // Then, lows
-            else if (isCrouching)
-            {
-                attackType = 4;
-            }
-            // Finally, forwards
-            else if (isMoving)
-            {
-                attackType = 7;
-            }
-            
-            // We can modify which attack in the string
-            // to do based on nChain
-            attackType += nChain;
-
-            // We need to begin our startup frames
-            startupFrameCounter = attacks[attackType].startupFrames;
-
-            // Reset our sprite counter
-            currentSprite = -1;
-
-            // We are obviously now attacking
-            isAttacking = true;
-
-            // Increment nChain to keep track of how
-            // many normals we've done
-            nChain++;
         }
     }
 
@@ -731,6 +654,7 @@ public class PlayerController : MonoBehaviour
         currentSprite = -1;
 
         // We are now attacking
+        canAttack = false;
         isAttacking = true;
     }
 
@@ -840,27 +764,21 @@ public class PlayerController : MonoBehaviour
         float rightOfMe = gameObject.GetComponent<BoxCollider2D>().bounds.center.x + 
             gameObject.GetComponent<BoxCollider2D>().bounds.extents.x;
 
-        // First, we will count the number of collisions below
         foreach (ContactPoint2D pt in collision.contacts)
         {
+            // First, we will count the number of collisions below
             if (pt.point.y <= belowMe)
             {
                 ctBelow++;
             }
-        }
 
-        // Next, to the left
-        foreach (ContactPoint2D pt in collision.contacts)
-        {
+            // Next, to the left
             if (pt.point.x <= leftOfMe)
             {
                 ctLeft++;
             }
-        }
 
-        // Finally, to the right
-        foreach (ContactPoint2D pt in collision.contacts)
-        {
+            // Finally, to the right
             if (pt.point.x >= rightOfMe)
             {
                 ctRight++;
@@ -870,7 +788,9 @@ public class PlayerController : MonoBehaviour
         // If there are 2 or more collisions below us,
         // then we are on the ground
         // Otherwise, we are in the air
-        if (ctBelow >= 2)
+        // If we are not colliding with the ground,
+        // then we can ignore this instance
+        if (ctBelow >= 2 || collision.gameObject.tag != "Ground")
         {
             isGrounded = true;
         }
@@ -916,5 +836,23 @@ public class PlayerController : MonoBehaviour
         Vector3 boxSize = GetComponent<BoxCollider2D>().size;
 
         Gizmos.DrawWireCube(boxPos, boxSize);
+    }
+
+    // <summary>
+    // Called when this object is destroyed
+    // Used to remove handlers for our actions
+    // </summary>
+    private void OnDestroy()
+    {
+        // Remove all handlers
+        move.started -= Handle_MoveStart;
+        jump.performed -= Handle_Jump;
+        crouch.started -= Handle_CrouchStart;
+        normalAtk.performed -= Handle_Normal;
+        specialAtk.performed -= Handle_Special;
+        restart.performed -= Handle_Restart;
+        quit.performed -= Handle_Quit;
+        move.canceled -= Handle_MoveEnd;
+        crouch.canceled -= Handle_CrouchEnd;
     }
 }
