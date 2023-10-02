@@ -58,11 +58,12 @@ public class PlayerController : FighterController
     // A counter to keep track of the next sprite to play
     private int currentSprite;
 
-    // Movement sprites
+    // Movement/misc. sprites
     [SerializeField] private Sprite[] walkSprites;
     [SerializeField] private Sprite[] jumpSprites;
     [SerializeField] private Sprite[] fallSprites;
     [SerializeField] private Sprite[] crouchSprites;
+    [SerializeField] private Sprite[] deathSprites;
 
     // Normal attack sprites
     [SerializeField] private Sprite[] standNSprites;
@@ -72,7 +73,6 @@ public class PlayerController : FighterController
     [SerializeField] private Sprite[] crouchNNSprites;
     [SerializeField] private Sprite[] crouchNNNSprites;
     [SerializeField] private Sprite[] forwardNSprites;
-    [SerializeField] private Sprite[] forwardNNNSprites;
     [SerializeField] private Sprite[] airNSprites;
     [SerializeField] private Sprite[] airNNSprites;
     [SerializeField] private Sprite[] airNNNSprites;
@@ -136,6 +136,7 @@ public class PlayerController : FighterController
 
         // Initialize superclass variables
         hp = 25;
+        hitstunFrames = 0;
         SetUpAttacks();
     }
 
@@ -203,7 +204,8 @@ public class PlayerController : FighterController
             UndoAdjustTransform();
 
             // Begin drawing the hitbox for the attack
-            hitBox.StartHitBox(attackType, facingRight);
+            hitBox.StartHitBox(attackType, facingRight, attacks[attackType].hitstun,
+                attacks[attackType].damage, attacks[attackType].knockback);
 
             // Set our active frame counter to keep track of
             // how long the hitbox exists for
@@ -307,6 +309,7 @@ public class PlayerController : FighterController
                     }
                     break;
                 case 3: //5NNN
+                case 9: //6NNN
                     {
                         currentSprite %= standNNNSprites.Length;
                         s = standNNNSprites[currentSprite];
@@ -342,10 +345,6 @@ public class PlayerController : FighterController
                 case 7: //6N (not implemented)
                     /*currentSprite %= forwardNSprites.Length;
                     s = forwardNSprites[currentSprite];
-                    break;*/
-                case 9: //6NNN (not implemented)
-                    /*currentSprite %= forwardNNNSprites.Length;
-                    s = forwardNNNSprites[currentSprite];
                     break;*/
                 case 10: //j.N
                     {
@@ -462,11 +461,6 @@ public class PlayerController : FighterController
         // Apply the chosen sprite to the SpriteRenderer
         // (If s is null and the Animator is enabled, nothing happens)
         gameObject.GetComponent<SpriteRenderer>().sprite = s;
-
-        if(attackType > 0)
-        {
-            EditorApplication.isPaused = true;
-        }
     }
 
     // <summary>
@@ -497,30 +491,33 @@ public class PlayerController : FighterController
     // <param name="obj"> information as to what triggered this action </param>
     private void Handle_MoveStart(InputAction.CallbackContext obj)
     {
-        // We want to be able to move
-        // as long as we are not crouching
-        if(!isCrouching)
+        if (hitstunFrames <= 0)
         {
-            isMoving = true;
-        }
-
-        // We need to turn around if we are trying to move in a new direction
-        float moveDir = move.ReadValue<float>();
-
-        if (moveDir < 0)
-        {
-            if (facingRight)
+            // We want to be able to move
+            // as long as we are not crouching
+            if (!isCrouching)
             {
-                InvertHurtboxes();
-                facingRight = false;
+                isMoving = true;
             }
-        }
-        else if (moveDir > 0)
-        {
-            if (!facingRight)
+
+            // We need to turn around if we are trying to move in a new direction
+            float moveDir = move.ReadValue<float>();
+
+            if (moveDir < 0)
             {
-                InvertHurtboxes();
-                facingRight = true;
+                if (facingRight)
+                {
+                    InvertHurtboxes();
+                    facingRight = false;
+                }
+            }
+            else if (moveDir > 0)
+            {
+                if (!facingRight)
+                {
+                    InvertHurtboxes();
+                    facingRight = true;
+                }
             }
         }
     }
@@ -531,19 +528,22 @@ public class PlayerController : FighterController
     // <param name="obj"> information as to what triggered this action </param>
     private void Handle_Jump(InputAction.CallbackContext obj)
     {
-        // We want to be able to jump
-        // as long as we are on the ground
-        if (isGrounded)
+        if (hitstunFrames <= 0)
         {
-            // We need to keep our current X velocity and carry it
-            // into the jump
-            float currentX = gameObject.GetComponent<Rigidbody2D>().velocity.x;
+            // We want to be able to jump
+            // as long as we are on the ground
+            if (isGrounded)
+            {
+                // We need to keep our current X velocity and carry it
+                // into the jump
+                float currentX = gameObject.GetComponent<Rigidbody2D>().velocity.x;
 
-            // Apply our new velocity
-            gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(currentX, 10);
+                // Apply our new velocity
+                gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(currentX, 10);
 
-            // Since we jumped, we are no longer on the ground
-            isGrounded = false;
+                // Since we jumped, we are no longer on the ground
+                isGrounded = false;
+            }
         }
     }
 
@@ -553,11 +553,14 @@ public class PlayerController : FighterController
     // <param name="obj"> information as to what triggered this action </param>
     private void Handle_CrouchStart(InputAction.CallbackContext obj)
     {
-        // We want to be able to crouch
-        // as long as we are on the ground
-        if (isGrounded)
+        if (hitstunFrames <= 0)
         {
-            isCrouching = true;
+            // We want to be able to crouch
+            // as long as we are on the ground
+            if (isGrounded)
+            {
+                isCrouching = true;
+            }
         }
     }
 
@@ -567,50 +570,55 @@ public class PlayerController : FighterController
     // <param name="obj"> information as to what triggered this action </param>
     private void Handle_Normal(InputAction.CallbackContext obj)
     {
-        // nChain keeps track of how many normal attacks
-        // we have strung in a row
-        // If we have done too many in a row, we can't do it again
-        if (nChain < 3)
+        if (hitstunFrames <= 0)
         {
-            if(canAttack)
+            // nChain keeps track of how many normal attacks
+            // we have strung in a row
+            // If we have done too many in a row, we can't do it again
+            if (nChain < 3)
             {
-                // Now, we need to determine which attack to perform
-                // We will default to our standing normals
-                attackType = 1;
-
-                // First, we will check for aerials
-                if (!isGrounded)
+                if (canAttack)
                 {
-                    attackType = 10;
+                    // Now, we need to determine which attack to perform
+                    // We will default to our standing normals
+                    attackType = 1;
+
+                    // First, we will check for aerials
+                    if (!isGrounded)
+                    {
+                        attackType = 10;
+                    }
+                    // Then, lows
+                    else if (isCrouching)
+                    {
+                        attackType = 4;
+                    }
+                    // Finally, forwards
+                    else if (isMoving)
+                    {
+                        attackType = 7;
+                    }
+
+                    // We can modify which attack in the string
+                    // to do based on nChain
+                    attackType += nChain;
+
+                    // We need to begin our startup frames
+                    startupFrameCounter = attacks[attackType].startupFrames;
+                    activeFrameCounter = 0;
+                    recoveryFrameCounter = 0;
+
+                    // Reset our sprite counter
+                    currentSprite = -1;
+
+                    // We are obviously now attacking
+                    canAttack = false;
+                    isAttacking = true;
+
+                    // Increment nChain to keep track of how
+                    // many normals we've done
+                    nChain++;
                 }
-                // Then, lows
-                else if (isCrouching)
-                {
-                    attackType = 4;
-                }
-                // Finally, forwards
-                else if (isMoving)
-                {
-                    attackType = 7;
-                }
-
-                // We can modify which attack in the string
-                // to do based on nChain
-                attackType += nChain;
-
-                // We need to begin our startup frames
-                startupFrameCounter = attacks[attackType].startupFrames;
-
-                // Reset our sprite counter
-                currentSprite = -1;
-
-                // We are obviously now attacking
-                canAttack = false;
-                isAttacking = true;
-
-                // Increment nChain to keep track of how
-                // many normals we've done
-                nChain++;
             }
         }
     }
@@ -622,40 +630,45 @@ public class PlayerController : FighterController
     // <param name="obj"> information as to what triggered this action </param>
     private void Handle_Special(InputAction.CallbackContext obj)
     {
-        // Start with standing
-        attackType = 13;
-
-        // A special property: the character will levitate during the special
-        gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeAll;
-
-        // Unimplemented conditions for other specials
-        /*if(isCrouching)
+        if (hitstunFrames <= 0)
         {
-            attackType = 14;
+            // Start with standing
+            attackType = 13;
+
+            // A special property: the character will levitate during the special
+            gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeAll;
+
+            // Unimplemented conditions for other specials
+            /*if(isCrouching)
+            {
+                attackType = 14;
+            }
+            else if(isMoving)
+            {
+                float moveDir = move.ReadValue<float>();
+
+                if(moveDir > 0)
+                {
+                    attackType = 15;
+                }
+                else
+                {
+                    attackType = 16;
+                }
+            }*/
+
+            // Start the startup frames
+            startupFrameCounter = attacks[attackType].startupFrames;
+            activeFrameCounter = 0;
+            recoveryFrameCounter = 0;
+
+            // Reset the frame counter
+            currentSprite = -1;
+
+            // We are now attacking
+            canAttack = false;
+            isAttacking = true;
         }
-        else if(isMoving)
-        {
-            float moveDir = move.ReadValue<float>();
-
-            if(moveDir > 0)
-            {
-                attackType = 15;
-            }
-            else
-            {
-                attackType = 16;
-            }
-        }*/
-
-        // Start the startup frames
-        startupFrameCounter = attacks[attackType].startupFrames;
-
-        // Reset the frame counter
-        currentSprite = -1;
-
-        // We are now attacking
-        canAttack = false;
-        isAttacking = true;
     }
 
     // <summary>

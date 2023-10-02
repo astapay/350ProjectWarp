@@ -27,6 +27,9 @@ public class HUNDController : FighterController
     private int activeFrameCounter;
     private int recoveryFrameCounter;
 
+    private int waitFrames;
+    private int actionFrames;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -42,13 +45,23 @@ public class HUNDController : FighterController
         activeFrameCounter = 0;
         recoveryFrameCounter = 0;
 
+        waitFrames = Random.Range(1, 50);
+        actionFrames = Random.Range(1, 15);
+
         hp = 1;
+        hitstunFrames = 0;
         SetUpAttacks();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (actionFrames <= 0)
+        {
+            waitFrames = Random.Range(1, 50);
+            actionFrames = Random.Range(1, 15);
+        }
+
         // If all of our attack frame counters are below 0,
         // then we surely aren't attacking
         if (startupFrameCounter <= 0 && activeFrameCounter <= 0 && recoveryFrameCounter <= 0)
@@ -62,7 +75,7 @@ public class HUNDController : FighterController
         {
             DeathAnimation();
         }
-        else
+        else if (waitFrames <= 0)
         {
             float distFromPW = gm.FindDistance(this.gameObject, pw350);
 
@@ -114,7 +127,17 @@ public class HUNDController : FighterController
                 float currentY = gameObject.GetComponent<Rigidbody2D>().velocity.y;
                 gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(0, currentY);
             }
+
+            actionFrames--;
         }
+        else
+        {
+            isMoving = false;
+            float currentY = gameObject.GetComponent<Rigidbody2D>().velocity.y;
+            gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(0, currentY);
+        }
+
+        waitFrames--;
 
         // Now, we handle our attack if we are indeed attacking
         // Reduce our startup
@@ -126,7 +149,8 @@ public class HUNDController : FighterController
             hitBox.StopHitBox();
 
             // Begin drawing the hitbox for the attack
-            hitBox.StartHitBox(attackType, facingRight);
+            hitBox.StartHitBox(attackType, facingRight, attacks[attackType].hitstun,
+                attacks[attackType].damage, attacks[attackType].knockback);
 
             // Set our active frame counter to keep track of
             // how long the hitbox exists for
@@ -153,13 +177,22 @@ public class HUNDController : FighterController
         // Reduce our recovery frames
         recoveryFrameCounter--;
 
-        // If we are done with recovery, then we must be sure our
-        // RigidBody2D has the correct constraints
-        // (They are changed when we perform a special move)
         if (recoveryFrameCounter == 0)
         {
-            // Reset the RigidBody2D constraints
-            gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeRotation;
+            if(attackType == 18)
+            {
+                transform.position = new Vector2(transform.position.x, transform.position.y - 0.255f);
+
+                BoxCollider2D[] boxColliders = GetComponentsInChildren<BoxCollider2D>();
+
+                for (int i = 0; i < boxColliders.Length; i++)
+                {
+                    float xOffset = boxColliders[i].offset.x;
+                    float yOffset = boxColliders[i].offset.y + 0.255f;
+
+                    boxColliders[i].offset = new Vector2(xOffset, yOffset);
+                }
+            }
         }
 
         UpdateAnimation();
@@ -188,7 +221,33 @@ public class HUNDController : FighterController
                     {
                         currentSprite %= pounceSprites.Length;
                         s = pounceSprites[currentSprite];
-                        transform.position = new Vector2(transform.position.x + 0.15f, transform.position.y);
+
+                        if(currentSprite == 0)
+                        {
+                            transform.position = new Vector2(transform.position.x, transform.position.y + 0.255f);
+
+                            BoxCollider2D[] boxColliders = GetComponentsInChildren<BoxCollider2D>();
+
+                            for (int i = 0; i < boxColliders.Length; i++)
+                            {
+                                float xOffset = boxColliders[i].offset.x;
+                                float yOffset = boxColliders[i].offset.y - 0.255f;
+
+                                boxColliders[i].offset = new Vector2(xOffset, yOffset);
+                            }
+                        }
+
+                        if(startupFrameCounter > 0)
+                        {
+                            if (facingRight)
+                            {
+                                transform.position = new Vector2(transform.position.x + 0.15f, transform.position.y);
+                            }
+                            else
+                            {
+                                transform.position = new Vector2(transform.position.x - 0.15f, transform.position.y);
+                            }
+                        }
                     }
                     break;
                 default:
@@ -217,11 +276,6 @@ public class HUNDController : FighterController
         }
 
         gameObject.GetComponent<SpriteRenderer>().sprite = s;
-
-        if (attackType == 18)
-        {
-            EditorApplication.isPaused = true;
-        }
     }
 
     private void DeathAnimation()
@@ -249,6 +303,8 @@ public class HUNDController : FighterController
     {
         attackType = 17;
         startupFrameCounter = attacks[attackType].startupFrames;
+        activeFrameCounter = 0;
+        recoveryFrameCounter = 0;
 
         currentSprite = -1;
         canAttack = false;
@@ -259,6 +315,8 @@ public class HUNDController : FighterController
     {
         attackType = 18;
         startupFrameCounter = attacks[attackType].startupFrames;
+        activeFrameCounter = 0;
+        recoveryFrameCounter = 0;
 
         currentSprite = -1;
         canAttack = false;

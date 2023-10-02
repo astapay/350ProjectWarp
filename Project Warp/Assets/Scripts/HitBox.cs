@@ -16,12 +16,20 @@ using UnityEngine.UIElements;
 
 public class HitBox : MonoBehaviour
 {
+    private int damage;
+    private int hitstun;
+    private Vector2 knockback;
+
     // <summary>
     // When called, begins drawing a hitbox depending on the input attack
     // </summary>
     // <param name="type"> The attack in question in the form of an int </param>
-    public void StartHitBox(int type, bool facingRight)
+    public void StartHitBox(int type, bool facingRight, int d, int h, Vector2 k)
     {
+        damage = d;
+        hitstun = h;
+        knockback = k;
+
         // Offset and size values for our hitbox
         float xOffset = 0;
         float yOffset = 0;
@@ -50,6 +58,7 @@ public class HitBox : MonoBehaviour
                 }
                 break;
             case 3: //5NNN
+            case 9: //6NNN
                 {
                     xOffset = 0.35f;
                     yOffset = 0.15f;
@@ -89,15 +98,7 @@ public class HitBox : MonoBehaviour
                     ySize = 1;
                 }
                 break;
-            case 9: //6NNN
-                {
-                    xOffset = 0;
-                    yOffset = 0;
-                    xSize = 1;
-                    ySize = 1;
-                }
-                break;
-            case 10: //j.N
+           case 10: //j.N
                 {
                     xOffset = 0.35f;
                     yOffset = 0.05f;
@@ -131,10 +132,10 @@ public class HitBox : MonoBehaviour
                 break;
             case 18: // HUND pounce
                 {
-                    xOffset = 0;
-                    yOffset = 0;
-                    xSize = 1;
-                    ySize = 1;
+                    xOffset = 0.5f;
+                    yOffset = -0.2f;
+                    xSize = 0.35f;
+                    ySize = 0.7f;
                 }
                 break;
             default:
@@ -183,5 +184,20 @@ public class HitBox : MonoBehaviour
         Gizmos.color = UnityEngine.Color.red;
         Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.localScale);
         Gizmos.DrawWireCube(position, boxSize);
+    }
+
+    public int getDamage()
+    {
+        return damage;
+    }
+
+    public int getHitstun()
+    {
+        return hitstun;
+    }
+
+    public Vector2 getKnockback()
+    {
+        return knockback;
     }
 }

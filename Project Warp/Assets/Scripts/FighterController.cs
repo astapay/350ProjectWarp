@@ -16,6 +16,7 @@ public struct Attack
     // Properties on hit
     public int damage;
     public int hitstun;
+    public Vector2 knockback;
 
     // Other properties
     public bool invulnerableHead;
@@ -25,6 +26,7 @@ public struct Attack
 public class FighterController : MonoBehaviour
 {
     protected int hp;
+    protected int hitstunFrames;
     protected Attack[] attacks;
 
     [SerializeField] protected HurtBox hurtBox;
@@ -59,6 +61,7 @@ public class FighterController : MonoBehaviour
         attacks[0].recoveryFrames = 0;
         attacks[0].damage = 0;
         attacks[0].hitstun = 0;
+        attacks[0].knockback = Vector2.zero;
         attacks[0].invulnerableHead = false;
         attacks[0].invulnerableAll = false;
 
@@ -68,6 +71,7 @@ public class FighterController : MonoBehaviour
         attacks[1].recoveryFrames = 10;
         attacks[1].damage = 1;
         attacks[1].hitstun = 5;
+        attacks[1].knockback = Vector2.zero;
         attacks[1].invulnerableHead = false;
         attacks[1].invulnerableAll = false;
 
@@ -77,6 +81,7 @@ public class FighterController : MonoBehaviour
         attacks[2].recoveryFrames = 19;
         attacks[2].damage = 3;
         attacks[2].hitstun = 8;
+        attacks[2].knockback = Vector2.zero;
         attacks[2].invulnerableHead = false;
         attacks[2].invulnerableAll = false;
 
@@ -86,6 +91,7 @@ public class FighterController : MonoBehaviour
         attacks[3].recoveryFrames = 21;
         attacks[3].damage = 7;
         attacks[3].hitstun = 20;
+        attacks[3].knockback = new Vector2(6, 0.3f);
         attacks[3].invulnerableHead = false;
         attacks[3].invulnerableAll = false;
 
@@ -95,6 +101,7 @@ public class FighterController : MonoBehaviour
         attacks[4].recoveryFrames = 14;
         attacks[4].damage = 2;
         attacks[4].hitstun = 6;
+        attacks[4].knockback = Vector2.zero;
         attacks[4].invulnerableHead = false;
         attacks[4].invulnerableAll = false;
 
@@ -104,6 +111,7 @@ public class FighterController : MonoBehaviour
         attacks[5].recoveryFrames = 18;
         attacks[5].damage = 3;
         attacks[5].hitstun = 9;
+        attacks[5].knockback = Vector2.zero;
         attacks[5].invulnerableHead = false;
         attacks[5].invulnerableAll = false;
 
@@ -113,6 +121,7 @@ public class FighterController : MonoBehaviour
         attacks[6].recoveryFrames = 20;
         attacks[6].damage = 7;
         attacks[6].hitstun = 20;
+        attacks[6].knockback = new Vector2(0.3f, 6);
         attacks[6].invulnerableHead = true;
         attacks[6].invulnerableAll = false;
 
@@ -122,6 +131,7 @@ public class FighterController : MonoBehaviour
         attacks[7].recoveryFrames = 4;
         attacks[7].damage = 10;
         attacks[7].hitstun = 25;
+        attacks[7].knockback = new Vector2(0.2f, 0);
         attacks[7].invulnerableHead = false;
         attacks[7].invulnerableAll = false;
 
@@ -131,13 +141,19 @@ public class FighterController : MonoBehaviour
         attacks[8].recoveryFrames = 19;
         attacks[8].damage = 3;
         attacks[8].hitstun = 8;
+        attacks[8].knockback = Vector2.zero;
         attacks[8].invulnerableHead = false;
         attacks[8].invulnerableAll = false;
 
         //PW-350 6NNN
-        attacks[9].startupFrames = 24;
-        attacks[9].activeFrames = 1;
-        attacks[9].recoveryFrames = 26;
+        attacks[9].startupFrames = 14;
+        attacks[9].activeFrames = 8;
+        attacks[9].recoveryFrames = 21;
+        attacks[9].damage = 7;
+        attacks[9].hitstun = 20;
+        attacks[9].knockback = new Vector2(6, 0.3f);
+        attacks[9].invulnerableHead = false;
+        attacks[9].invulnerableAll = false;
 
         //PW-350 j.N
         attacks[10].startupFrames = 8;
@@ -145,6 +161,7 @@ public class FighterController : MonoBehaviour
         attacks[10].recoveryFrames = 8;
         attacks[10].damage = 1;
         attacks[10].hitstun = 7;
+        attacks[10].knockback = new Vector2(0.1f, 0.2f);
         attacks[10].invulnerableHead = false;
         attacks[10].invulnerableAll = false;
 
@@ -154,6 +171,7 @@ public class FighterController : MonoBehaviour
         attacks[11].recoveryFrames = 13;
         attacks[11].damage = 3;
         attacks[11].hitstun = 8;
+        attacks[11].knockback = new Vector2(0.1f, 0.2f);
         attacks[11].invulnerableHead = false;
         attacks[11].invulnerableAll = false;
 
@@ -163,6 +181,7 @@ public class FighterController : MonoBehaviour
         attacks[12].recoveryFrames = 19;
         attacks[12].damage = 6;
         attacks[12].hitstun = 14;
+        attacks[12].knockback = new Vector2(0.4f, -6);
         attacks[12].invulnerableHead = false;
         attacks[12].invulnerableAll = false;
 
@@ -172,6 +191,7 @@ public class FighterController : MonoBehaviour
         attacks[13].recoveryFrames = 6;
         attacks[13].damage = 0;
         attacks[13].hitstun = 0;
+        attacks[13].knockback = Vector2.zero;
         attacks[13].invulnerableHead = false;
         attacks[13].invulnerableAll = false;
 
@@ -181,6 +201,7 @@ public class FighterController : MonoBehaviour
         attacks[14].recoveryFrames = 46;
         attacks[14].damage = 0;
         attacks[14].hitstun = 0;
+        attacks[14].knockback = Vector2.zero;
         attacks[14].invulnerableHead = false;
         attacks[14].invulnerableAll = false;
 
@@ -190,6 +211,7 @@ public class FighterController : MonoBehaviour
         attacks[15].recoveryFrames = 15;
         attacks[15].damage = 0;
         attacks[15].hitstun = 0;
+        attacks[15].knockback = Vector2.zero;
         attacks[15].invulnerableHead = false;
         attacks[15].invulnerableAll = false;
 
@@ -199,6 +221,7 @@ public class FighterController : MonoBehaviour
         attacks[16].recoveryFrames = 15;
         attacks[16].damage = 0;
         attacks[16].hitstun = 0;
+        attacks[16].knockback = Vector2.zero;
         attacks[16].invulnerableHead = false;
         attacks[16].invulnerableAll = false;
 
@@ -208,6 +231,7 @@ public class FighterController : MonoBehaviour
         attacks[17].recoveryFrames = 10;
         attacks[17].damage = 1;
         attacks[17].hitstun = 6;
+        attacks[17].knockback = Vector2.zero;
         attacks[17].invulnerableHead = false;
         attacks[17].invulnerableAll = false;
 
@@ -217,6 +241,7 @@ public class FighterController : MonoBehaviour
         attacks[18].recoveryFrames = 1;
         attacks[18].damage = 3;
         attacks[18].hitstun = 20;
+        attacks[18].knockback = new Vector2(6, 0.3f);
         attacks[18].invulnerableHead = false;
         attacks[18].invulnerableAll = false;
 
@@ -244,6 +269,16 @@ public class FighterController : MonoBehaviour
         {
             hp = 0;
         }
+    }
+
+    public void ApplyHitstun(int hitstun)
+    {
+        hitstunFrames = hitstun;
+    }
+
+    public void ApplyKnockback(Vector2 knockback)
+    {
+        GetComponent<Rigidbody2D>().AddForce(knockback);
     }
 
     public void InvertHurtboxes()

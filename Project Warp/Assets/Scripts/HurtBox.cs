@@ -21,11 +21,13 @@ public class HurtBox : MonoBehaviour
     // The code in this method is temporary
     // </summary>
     // <param name="damage"> The amount of damage we take from the hit </param>
-    public void GetHit(int damage)
+    public void GetHit(int damage, int hitstun, Vector2 knockback)
     {
         FighterController parent = GetComponentInParent<FighterController>();
 
         parent.ReduceHP(damage);
+        parent.ApplyHitstun(hitstun);
+        parent.ApplyKnockback(knockback);
     }
 
     // <summary>
@@ -58,9 +60,11 @@ public class HurtBox : MonoBehaviour
     // In this case, a HitBox's collider </param>
     private void OnTriggerEnter2D(Collider2D other)
     {
-        //Handle our damage
-        GetHit(1);
+        HitBox hitBox = other.GetComponent<HitBox>();
 
-        gm.FreezeTime(5);
+        //Handle our damage
+        GetHit(hitBox.getDamage(), hitBox.getHitstun(), hitBox.getKnockback());
+
+        gm.FreezeTime(10);
     }
 }
