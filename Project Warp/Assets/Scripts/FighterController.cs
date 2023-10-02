@@ -31,8 +31,8 @@ public class FighterController : MonoBehaviour
 
     [SerializeField] protected HurtBox hurtBox;
 
-    private Vector2 saveTransform;
-    private bool transformSaved;
+    protected Vector2 saveTransform;
+    protected bool transformSaved;
 
     // Start is called before the first frame update
     void Start()

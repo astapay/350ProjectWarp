@@ -90,14 +90,14 @@ public class HitBox : MonoBehaviour
                     ySize = 0.45f;
                 }
                 break;
-            case 7: //6N
+            /*case 7: //6N
                 {
                     xOffset = 0;
                     yOffset = 0;
                     xSize = 1;
                     ySize = 1;
                 }
-                break;
+                break;*/
            case 10: //j.N
                 {
                     xOffset = 0.35f;

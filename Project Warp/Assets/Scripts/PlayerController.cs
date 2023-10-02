@@ -137,6 +137,8 @@ public class PlayerController : FighterController
         // Initialize superclass variables
         hp = 25;
         hitstunFrames = 0;
+        saveTransform = transform.position;
+        transformSaved = false;
         SetUpAttacks();
     }
 
@@ -201,7 +203,11 @@ public class PlayerController : FighterController
         if (startupFrameCounter == 0)
         {
             hitBox.StopHitBox();
-            UndoAdjustTransform();
+
+            if (attackType >= 1 && attackType <= 3)
+            {
+                UndoAdjustTransform();
+            }
 
             // Begin drawing the hitbox for the attack
             hitBox.StartHitBox(attackType, facingRight, attacks[attackType].hitstun,
@@ -244,7 +250,11 @@ public class PlayerController : FighterController
         {
             // Reset the RigidBody2D constraints
             gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeRotation;
-            UndoAdjustTransform();
+
+            if(attackType >= 1 && attackType <= 3)
+            {
+                UndoAdjustTransform();
+            }
 
             canAttack = true;
             isAttacking = false;
@@ -342,8 +352,8 @@ public class PlayerController : FighterController
                         s = crouchNNNSprites[currentSprite];
                     }
                     break;
-                case 7: //6N (not implemented)
-                    /*currentSprite %= forwardNSprites.Length;
+                /*case 7: //6N (not implemented)
+                    currentSprite %= forwardNSprites.Length;
                     s = forwardNSprites[currentSprite];
                     break;*/
                 case 10: //j.N

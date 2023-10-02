@@ -50,6 +50,8 @@ public class HUNDController : FighterController
 
         hp = 1;
         hitstunFrames = 0;
+        saveTransform = transform.position;
+        transformSaved = false;
         SetUpAttacks();
     }
 
