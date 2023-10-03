@@ -17,10 +17,6 @@ public struct Attack
     public int damage;
     public int hitstun;
     public Vector2 knockback;
-
-    // Other properties
-    public bool invulnerableHead;
-    public bool invulnerableAll;
 }
 
 public class FighterController : MonoBehaviour
@@ -53,7 +49,7 @@ public class FighterController : MonoBehaviour
     // </summary>
     protected void SetUpAttacks()
     {
-        attacks = new Attack[19];
+        attacks = new Attack[25];
 
         //blank
         attacks[0].startupFrames = 0;
@@ -62,8 +58,6 @@ public class FighterController : MonoBehaviour
         attacks[0].damage = 0;
         attacks[0].hitstun = 0;
         attacks[0].knockback = Vector2.zero;
-        attacks[0].invulnerableHead = false;
-        attacks[0].invulnerableAll = false;
 
         //PW-350 5N
         attacks[1].startupFrames = 6;
@@ -72,8 +66,6 @@ public class FighterController : MonoBehaviour
         attacks[1].damage = 1;
         attacks[1].hitstun = 5;
         attacks[1].knockback = Vector2.zero;
-        attacks[1].invulnerableHead = false;
-        attacks[1].invulnerableAll = false;
 
         //PW-350 5NN
         attacks[2].startupFrames = 8;
@@ -82,8 +74,6 @@ public class FighterController : MonoBehaviour
         attacks[2].damage = 3;
         attacks[2].hitstun = 8;
         attacks[2].knockback = Vector2.zero;
-        attacks[2].invulnerableHead = false;
-        attacks[2].invulnerableAll = false;
 
         //PW-350 5NNN
         attacks[3].startupFrames = 14;
@@ -92,8 +82,6 @@ public class FighterController : MonoBehaviour
         attacks[3].damage = 7;
         attacks[3].hitstun = 20;
         attacks[3].knockback = new Vector2(6, 0.3f);
-        attacks[3].invulnerableHead = false;
-        attacks[3].invulnerableAll = false;
 
         //PW-350 2N
         attacks[4].startupFrames = 8;
@@ -102,8 +90,6 @@ public class FighterController : MonoBehaviour
         attacks[4].damage = 2;
         attacks[4].hitstun = 6;
         attacks[4].knockback = Vector2.zero;
-        attacks[4].invulnerableHead = false;
-        attacks[4].invulnerableAll = false;
 
         //PW-350 2NN
         attacks[5].startupFrames = 12;
@@ -112,8 +98,6 @@ public class FighterController : MonoBehaviour
         attacks[5].damage = 3;
         attacks[5].hitstun = 9;
         attacks[5].knockback = Vector2.zero;
-        attacks[5].invulnerableHead = false;
-        attacks[5].invulnerableAll = false;
 
         //PW-350 2NNN
         attacks[6].startupFrames = 14;
@@ -122,18 +106,14 @@ public class FighterController : MonoBehaviour
         attacks[6].damage = 7;
         attacks[6].hitstun = 20;
         attacks[6].knockback = new Vector2(0.3f, 6);
-        attacks[6].invulnerableHead = true;
-        attacks[6].invulnerableAll = false;
 
         //PW-350 6N
-        attacks[7].startupFrames = 20;
+        attacks[7].startupFrames = 15;
         attacks[7].activeFrames = 6;
-        attacks[7].recoveryFrames = 4;
+        attacks[7].recoveryFrames = 6;
         attacks[7].damage = 10;
         attacks[7].hitstun = 25;
         attacks[7].knockback = new Vector2(0.2f, 0);
-        attacks[7].invulnerableHead = false;
-        attacks[7].invulnerableAll = false;
 
         //PW-350 6NN
         attacks[8].startupFrames = 7;
@@ -142,8 +122,6 @@ public class FighterController : MonoBehaviour
         attacks[8].damage = 3;
         attacks[8].hitstun = 8;
         attacks[8].knockback = Vector2.zero;
-        attacks[8].invulnerableHead = false;
-        attacks[8].invulnerableAll = false;
 
         //PW-350 6NNN
         attacks[9].startupFrames = 14;
@@ -152,8 +130,6 @@ public class FighterController : MonoBehaviour
         attacks[9].damage = 7;
         attacks[9].hitstun = 20;
         attacks[9].knockback = new Vector2(6, 0.3f);
-        attacks[9].invulnerableHead = false;
-        attacks[9].invulnerableAll = false;
 
         //PW-350 j.N
         attacks[10].startupFrames = 8;
@@ -162,8 +138,6 @@ public class FighterController : MonoBehaviour
         attacks[10].damage = 1;
         attacks[10].hitstun = 7;
         attacks[10].knockback = new Vector2(0.1f, 0.2f);
-        attacks[10].invulnerableHead = false;
-        attacks[10].invulnerableAll = false;
 
         //PW-350 j.NN
         attacks[11].startupFrames = 7;
@@ -172,8 +146,6 @@ public class FighterController : MonoBehaviour
         attacks[11].damage = 3;
         attacks[11].hitstun = 8;
         attacks[11].knockback = new Vector2(0.1f, 0.2f);
-        attacks[11].invulnerableHead = false;
-        attacks[11].invulnerableAll = false;
 
         //PW-350 j.NNN
         attacks[12].startupFrames = 13;
@@ -182,8 +154,6 @@ public class FighterController : MonoBehaviour
         attacks[12].damage = 6;
         attacks[12].hitstun = 14;
         attacks[12].knockback = new Vector2(0.4f, -6);
-        attacks[12].invulnerableHead = false;
-        attacks[12].invulnerableAll = false;
 
         //PW-350 5S
         attacks[13].startupFrames = 11;
@@ -192,66 +162,94 @@ public class FighterController : MonoBehaviour
         attacks[13].damage = 0;
         attacks[13].hitstun = 0;
         attacks[13].knockback = Vector2.zero;
-        attacks[13].invulnerableHead = false;
-        attacks[13].invulnerableAll = false;
 
         //PW-350 2S
-        attacks[14].startupFrames = 9;
-        attacks[14].activeFrames = 17;
-        attacks[14].recoveryFrames = 46;
+        attacks[14].startupFrames = 10;
+        attacks[14].activeFrames = 18;
+        attacks[14].recoveryFrames = 25;
         attacks[14].damage = 0;
         attacks[14].hitstun = 0;
         attacks[14].knockback = Vector2.zero;
-        attacks[14].invulnerableHead = false;
-        attacks[14].invulnerableAll = false;
 
         //PW-350 6S
         attacks[15].startupFrames = 13;
         attacks[15].activeFrames = 14;
         attacks[15].recoveryFrames = 15;
-        attacks[15].damage = 0;
-        attacks[15].hitstun = 0;
-        attacks[15].knockback = Vector2.zero;
-        attacks[15].invulnerableHead = false;
-        attacks[15].invulnerableAll = false;
-
-        //PW-350 4S
-        attacks[16].startupFrames = 4;
-        attacks[16].activeFrames = 25;
-        attacks[16].recoveryFrames = 15;
-        attacks[16].damage = 0;
-        attacks[16].hitstun = 0;
-        attacks[16].knockback = Vector2.zero;
-        attacks[16].invulnerableHead = false;
-        attacks[16].invulnerableAll = false;
+        attacks[15].damage = 3;
+        attacks[15].hitstun = 7;
+        attacks[15].knockback = new Vector2(0.3f, 0.3f);
 
         //HUND Bite
-        attacks[17].startupFrames = 7;
-        attacks[17].activeFrames = 3;
-        attacks[17].recoveryFrames = 10;
-        attacks[17].damage = 1;
-        attacks[17].hitstun = 6;
-        attacks[17].knockback = Vector2.zero;
-        attacks[17].invulnerableHead = false;
-        attacks[17].invulnerableAll = false;
+        attacks[16].startupFrames = 7;
+        attacks[16].activeFrames = 3;
+        attacks[16].recoveryFrames = 10;
+        attacks[16].damage = 1;
+        attacks[16].hitstun = 6;
+        attacks[16].knockback = Vector2.zero;
 
         //HUND Pounce
-        attacks[18].startupFrames = 7;
-        attacks[18].activeFrames = 2;
-        attacks[18].recoveryFrames = 1;
-        attacks[18].damage = 3;
-        attacks[18].hitstun = 20;
-        attacks[18].knockback = new Vector2(6, 0.3f);
-        attacks[18].invulnerableHead = false;
-        attacks[18].invulnerableAll = false;
+        attacks[17].startupFrames = 7;
+        attacks[17].activeFrames = 2;
+        attacks[17].recoveryFrames = 1;
+        attacks[17].damage = 3;
+        attacks[17].hitstun = 20;
+        attacks[17].knockback = new Vector2(6, 0.3f);
 
         //Hazmat Whack
+        attacks[18].startupFrames = 0;
+        attacks[18].activeFrames = 0;
+        attacks[18].recoveryFrames = 0;
+        attacks[18].damage = 0;
+        attacks[18].hitstun = 0;
+        attacks[18].knockback = Vector2.zero;
 
-        //Hazmat Grab
+        //Hazmat Punch
+        attacks[19].startupFrames = 0;
+        attacks[19].activeFrames = 0;
+        attacks[19].recoveryFrames = 0;
+        attacks[19].damage = 0;
+        attacks[19].hitstun = 0;
+        attacks[19].knockback = Vector2.zero;
 
         //Shroom Kick
+        attacks[20].startupFrames = 0;
+        attacks[20].activeFrames = 0;
+        attacks[20].recoveryFrames = 0;
+        attacks[20].damage = 0;
+        attacks[20].hitstun = 0;
+        attacks[20].knockback = Vector2.zero;
 
         //Shroom Spore
+        attacks[21].startupFrames = 0;
+        attacks[21].activeFrames = 0;
+        attacks[21].recoveryFrames = 0;
+        attacks[21].damage = 0;
+        attacks[21].hitstun = 0;
+        attacks[21].knockback = Vector2.zero;
+
+        //BB-Hands Kick
+        attacks[22].startupFrames = 0;
+        attacks[22].activeFrames = 0;
+        attacks[22].recoveryFrames = 0;
+        attacks[22].damage = 0;
+        attacks[22].hitstun = 0;
+        attacks[22].knockback = Vector2.zero;
+
+        //BB-Hands Fire
+        attacks[23].startupFrames = 0;
+        attacks[23].activeFrames = 0;
+        attacks[23].recoveryFrames = 0;
+        attacks[23].damage = 0;
+        attacks[23].hitstun = 0;
+        attacks[23].knockback = Vector2.zero;
+
+        //BB-Hands Slam
+        attacks[24].startupFrames = 0;
+        attacks[24].activeFrames = 0;
+        attacks[24].recoveryFrames = 0;
+        attacks[24].damage = 0;
+        attacks[24].hitstun = 0;
+        attacks[24].knockback = Vector2.zero;
     }
 
     // <summary>
@@ -315,6 +313,11 @@ public class FighterController : MonoBehaviour
 
                 boxColliders[i].offset = new Vector2(xOffset, yOffset);
             }
+
+            Camera c = Camera.main;
+
+            c.transform.position = new Vector3(c.transform.position.x + xChange, 
+                c.transform.position.y + yChange, -10);
         }
     }
 

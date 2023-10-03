@@ -30,6 +30,26 @@ public class HurtBox : MonoBehaviour
         parent.ApplyKnockback(knockback);
     }
 
+    public void TurnOff()
+    {
+        BoxCollider2D[] boxColliders = GetComponents<BoxCollider2D>();
+
+        for(int i = 0; i < boxColliders.Length; i++)
+        {
+            boxColliders[i].enabled = false;
+        }
+    }
+
+    public void TurnOn()
+    {
+        BoxCollider2D[] boxColliders = GetComponents<BoxCollider2D>();
+
+        for (int i = 0; i < boxColliders.Length; i++)
+        {
+            boxColliders[i].enabled = true;
+        }
+    }
+
     // <summary>
     // Draws each hurtbox in the Scene View
     // Very useful for debugging

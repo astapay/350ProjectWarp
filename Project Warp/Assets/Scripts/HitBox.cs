@@ -40,7 +40,7 @@ public class HitBox : MonoBehaviour
         // Keep in mind that these are temporary
         switch (type)
         {
-            case 1: //5N
+            case 1: // PW-350 5N
                 {
                     xOffset = 0.2f;
                     yOffset = 0.1f;
@@ -48,8 +48,8 @@ public class HitBox : MonoBehaviour
                     ySize = 0.25f;
                 }
                 break;
-            case 2: //5NN
-            case 8: //6NN
+            case 2: // PW-350 5NN
+            case 8: // PW-350 6NN
                 {
                     xOffset = 0.25f;
                     yOffset = 0.26f;
@@ -57,8 +57,8 @@ public class HitBox : MonoBehaviour
                     ySize = 0.45f;
                 }
                 break;
-            case 3: //5NNN
-            case 9: //6NNN
+            case 3: // PW-350 5NNN
+            case 9: // PW-350 6NNN
                 {
                     xOffset = 0.35f;
                     yOffset = 0.15f;
@@ -66,7 +66,7 @@ public class HitBox : MonoBehaviour
                     ySize = 0.5f;
                 }
                 break;
-            case 4: //2N
+            case 4: // PW-350 2N
                 {
                     xOffset = 0.3f;
                     yOffset = -0.4f;
@@ -74,7 +74,7 @@ public class HitBox : MonoBehaviour
                     ySize = 0.2f;
                 }
                 break;
-            case 5: //2NN
+            case 5: // PW-350 2NN
                 {
                     xOffset = 0.35f;
                     yOffset = -0.35f;
@@ -82,7 +82,7 @@ public class HitBox : MonoBehaviour
                     ySize = 0.25f;
                 }
                 break;
-            case 6: //2NNN
+            case 6: // PW-350 2NNN
                 {
                     xOffset = 0.25f;
                     yOffset = 0.3f;
@@ -90,15 +90,15 @@ public class HitBox : MonoBehaviour
                     ySize = 0.45f;
                 }
                 break;
-            /*case 7: //6N
+            case 7: // PW-350 6N
                 {
-                    xOffset = 0;
-                    yOffset = 0;
-                    xSize = 1;
-                    ySize = 1;
+                    xOffset = 0.2f;
+                    yOffset = 0.2f;
+                    xSize = 0.35f;
+                    ySize = 0.2f;
                 }
-                break;*/
-           case 10: //j.N
+                break;
+           case 10: // PW-350 j.N
                 {
                     xOffset = 0.35f;
                     yOffset = 0.05f;
@@ -106,7 +106,7 @@ public class HitBox : MonoBehaviour
                     ySize = 0.2f;
                 }
                 break;
-            case 11: //j.NN
+            case 11: // PW-350 j.NN
                 {
                     xOffset = 0.3f;
                     yOffset = -0.15f;
@@ -114,7 +114,7 @@ public class HitBox : MonoBehaviour
                     ySize = 0.3f;
                 }
                 break;
-            case 12: //j.NNN/j.6N
+            case 12: // PW-350 j.NNN
                 {
                     xOffset = 0.4f;
                     yOffset = -0.25f;
@@ -122,7 +122,23 @@ public class HitBox : MonoBehaviour
                     ySize = 0.3f;
                 }
                 break;
-            case 17: // HUND bite
+            case 14: // PW-350 2S
+                {
+                    xOffset = 0.05f;
+                    yOffset = 0.05f;
+                    xSize = 1.1f;
+                    ySize = 1.1f;
+                }
+                break;
+            case 15: // PW-350 Projectile
+                {
+                    xOffset = 0;
+                    yOffset = 0.003f;
+                    xSize = 0.62f;
+                    ySize = 0.62f;
+                }
+                break;
+            case 16: // HUND bite
                 {
                     xOffset = 0.55f;
                     yOffset = 0.15f;
@@ -130,7 +146,7 @@ public class HitBox : MonoBehaviour
                     ySize = 0.45f;
                 }
                 break;
-            case 18: // HUND pounce
+            case 17: // HUND pounce
                 {
                     xOffset = 0.5f;
                     yOffset = -0.2f;

@@ -48,7 +48,7 @@ public class HUNDController : FighterController
         waitFrames = Random.Range(1, 50);
         actionFrames = Random.Range(1, 15);
 
-        hp = 1;
+        hp = 20;
         hitstunFrames = 0;
         saveTransform = transform.position;
         transformSaved = false;
@@ -131,6 +131,8 @@ public class HUNDController : FighterController
             }
 
             actionFrames--;
+
+            UpdateAnimation();
         }
         else
         {
@@ -181,23 +183,11 @@ public class HUNDController : FighterController
 
         if (recoveryFrameCounter == 0)
         {
-            if(attackType == 18)
+            if(attackType == 17)
             {
-                transform.position = new Vector2(transform.position.x, transform.position.y - 0.255f);
-
-                BoxCollider2D[] boxColliders = GetComponentsInChildren<BoxCollider2D>();
-
-                for (int i = 0; i < boxColliders.Length; i++)
-                {
-                    float xOffset = boxColliders[i].offset.x;
-                    float yOffset = boxColliders[i].offset.y + 0.255f;
-
-                    boxColliders[i].offset = new Vector2(xOffset, yOffset);
-                }
+                UndoAdjustTransform();
             }
         }
-
-        UpdateAnimation();
     }
 
     private void UpdateAnimation()
@@ -213,41 +203,30 @@ public class HUNDController : FighterController
         {
             switch (attackType)
             {
-                case 17:
+                case 16:
                     {
                         currentSprite %= biteSprites.Length;
                         s = biteSprites[currentSprite];
                     }
                     break;
-                case 18:
+                case 17:
                     {
                         currentSprite %= pounceSprites.Length;
                         s = pounceSprites[currentSprite];
 
-                        if(currentSprite == 0)
-                        {
-                            transform.position = new Vector2(transform.position.x, transform.position.y + 0.255f);
-
-                            BoxCollider2D[] boxColliders = GetComponentsInChildren<BoxCollider2D>();
-
-                            for (int i = 0; i < boxColliders.Length; i++)
-                            {
-                                float xOffset = boxColliders[i].offset.x;
-                                float yOffset = boxColliders[i].offset.y - 0.255f;
-
-                                boxColliders[i].offset = new Vector2(xOffset, yOffset);
-                            }
-                        }
-
                         if(startupFrameCounter > 0)
                         {
+                            AdjustTransform(0, 0.255f);
+
                             if (facingRight)
                             {
                                 transform.position = new Vector2(transform.position.x + 0.15f, transform.position.y);
+                                saveTransform.x = transform.position.x + 0.15f;
                             }
                             else
                             {
                                 transform.position = new Vector2(transform.position.x - 0.15f, transform.position.y);
+                                saveTransform.x = transform.position.x - 0.15f;
                             }
                         }
                     }
@@ -303,7 +282,7 @@ public class HUNDController : FighterController
 
     private void StartBiteAttack()
     {
-        attackType = 17;
+        attackType = 16;
         startupFrameCounter = attacks[attackType].startupFrames;
         activeFrameCounter = 0;
         recoveryFrameCounter = 0;
@@ -315,7 +294,7 @@ public class HUNDController : FighterController
 
     private void StartPounceAttack()
     {
-        attackType = 18;
+        attackType = 17;
         startupFrameCounter = attacks[attackType].startupFrames;
         activeFrameCounter = 0;
         recoveryFrameCounter = 0;

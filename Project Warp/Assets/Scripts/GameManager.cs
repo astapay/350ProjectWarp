@@ -45,6 +45,14 @@ public class GameManager : MonoBehaviour
         {
             c.transform.position = new Vector3(pw350.transform.position.x, 0, -10);
         }
+        else if (pw350.transform.position.x < 0)
+        {
+            c.transform.position = new Vector3(0, 0, -10);
+        }
+        else
+        {
+            c.transform.position = new Vector3(42, 0, -10);
+        }
 
         // Decrement our freeze counter
         freezeCounter--;
