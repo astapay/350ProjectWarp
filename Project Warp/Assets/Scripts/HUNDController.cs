@@ -9,12 +9,14 @@ public class HUNDController : FighterController
     [SerializeField] private int speed;
     [SerializeField] private GameManager gm;
     [SerializeField] private HitBox hitBox;
+    [SerializeField] private GameObject portalGem;
     private GameObject pw350;
 
     private bool facingRight;
     private bool isMoving;
     private bool canAttack;
     private bool isAttacking;
+    private bool gemSpawned;
 
     private int currentSprite;
     [SerializeField] private Sprite[] walkSprites;
@@ -40,12 +42,13 @@ public class HUNDController : FighterController
         isMoving = false;
         canAttack = true;
         isAttacking = false;
+        gemSpawned = false;
 
         startupFrameCounter = 0;
         activeFrameCounter = 0;
         recoveryFrameCounter = 0;
 
-        waitFrames = Random.Range(1, 50);
+        waitFrames = Random.Range(1, 90);
         actionFrames = Random.Range(1, 15);
 
         hp = 20;
@@ -60,7 +63,7 @@ public class HUNDController : FighterController
     {
         if (actionFrames <= 0)
         {
-            waitFrames = Random.Range(1, 50);
+            waitFrames = Random.Range(1, 90);
             actionFrames = Random.Range(1, 15);
         }
 
@@ -77,7 +80,7 @@ public class HUNDController : FighterController
         {
             DeathAnimation();
         }
-        else if (waitFrames <= 0)
+        else if (waitFrames <= 0 && hitstunFrames <= 0)
         {
             float distFromPW = gm.FindDistance(this.gameObject, pw350);
 
@@ -132,13 +135,15 @@ public class HUNDController : FighterController
 
             actionFrames--;
 
-            UpdateAnimation();
+            
         }
         else
         {
             isMoving = false;
             float currentY = gameObject.GetComponent<Rigidbody2D>().velocity.y;
             gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(0, currentY);
+
+            hitstunFrames--;
         }
 
         waitFrames--;
@@ -153,8 +158,8 @@ public class HUNDController : FighterController
             hitBox.StopHitBox();
 
             // Begin drawing the hitbox for the attack
-            hitBox.StartHitBox(attackType, facingRight, attacks[attackType].hitstun,
-                attacks[attackType].damage, attacks[attackType].knockback);
+            hitBox.StartHitBox(attackType, facingRight, attacks[attackType].damage,
+                attacks[attackType].hitstun, attacks[attackType].knockback);
 
             // Set our active frame counter to keep track of
             // how long the hitbox exists for
@@ -188,6 +193,8 @@ public class HUNDController : FighterController
                 UndoAdjustTransform();
             }
         }
+
+        UpdateAnimation();
     }
 
     private void UpdateAnimation()
@@ -199,61 +206,68 @@ public class HUNDController : FighterController
         // Temporarily disable the Animator for the idle animation
         gameObject.GetComponent<Animator>().enabled = false;
 
-        if (isAttacking)
+        if (hitstunFrames <= 0)
         {
-            switch (attackType)
+            if (isAttacking)
             {
-                case 16:
-                    {
-                        currentSprite %= biteSprites.Length;
-                        s = biteSprites[currentSprite];
-                    }
-                    break;
-                case 17:
-                    {
-                        currentSprite %= pounceSprites.Length;
-                        s = pounceSprites[currentSprite];
-
-                        if(startupFrameCounter > 0)
+                switch (attackType)
+                {
+                    case 16:
                         {
-                            AdjustTransform(0, 0.255f);
+                            currentSprite %= biteSprites.Length;
+                            s = biteSprites[currentSprite];
+                        }
+                        break;
+                    case 17:
+                        {
+                            currentSprite %= pounceSprites.Length;
+                            s = pounceSprites[currentSprite];
 
-                            if (facingRight)
+                            if (startupFrameCounter > 0)
                             {
-                                transform.position = new Vector2(transform.position.x + 0.15f, transform.position.y);
-                                saveTransform.x = transform.position.x + 0.15f;
-                            }
-                            else
-                            {
-                                transform.position = new Vector2(transform.position.x - 0.15f, transform.position.y);
-                                saveTransform.x = transform.position.x - 0.15f;
+                                AdjustTransform(0, 0.255f);
+
+                                if (facingRight)
+                                {
+                                    transform.position = new Vector2(transform.position.x + 0.15f, transform.position.y);
+                                    saveTransform.x = transform.position.x + 0.15f;
+                                }
+                                else
+                                {
+                                    transform.position = new Vector2(transform.position.x - 0.15f, transform.position.y);
+                                    saveTransform.x = transform.position.x - 0.15f;
+                                }
                             }
                         }
-                    }
-                    break;
-                default:
-                    gameObject.GetComponent<Animator>().enabled = true;
-                    break;
+                        break;
+                    default:
+                        gameObject.GetComponent<Animator>().enabled = true;
+                        break;
+                }
             }
-        }
-        else if (isMoving)
-        {
-            currentSprite %= walkSprites.Length;
-            s = walkSprites[currentSprite];
-
-            // We also need to update which direction we are looking
-            if (facingRight)
+            else if (isMoving)
             {
-                gameObject.GetComponent<SpriteRenderer>().flipX = true;
+                currentSprite %= walkSprites.Length;
+                s = walkSprites[currentSprite];
+
+                // We also need to update which direction we are looking
+                if (facingRight)
+                {
+                    gameObject.GetComponent<SpriteRenderer>().flipX = true;
+                }
+                else
+                {
+                    gameObject.GetComponent<SpriteRenderer>().flipX = false;
+                }
             }
             else
             {
-                gameObject.GetComponent<SpriteRenderer>().flipX = false;
+                gameObject.GetComponent<Animator>().enabled = true;
             }
         }
         else
         {
-            gameObject.GetComponent<Animator>().enabled = true;
+            s = deathSprites[3];
         }
 
         gameObject.GetComponent<SpriteRenderer>().sprite = s;
@@ -274,6 +288,13 @@ public class HUNDController : FighterController
         if (currentSprite >= deathSprites.Length)
         {
             currentSprite = deathSprites.Length - 1;
+
+            if(!gemSpawned)
+            {
+                Instantiate(portalGem, transform.position, Quaternion.identity);
+
+                gemSpawned = true;
+            }
         }
 
         // Render the updated sprite through the SpriteRenderer

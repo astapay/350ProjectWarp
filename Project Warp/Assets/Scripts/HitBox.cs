@@ -154,6 +154,62 @@ public class HitBox : MonoBehaviour
                     ySize = 0.7f;
                 }
                 break;
+            case 18: // Hazmat Whack
+                {
+                    xOffset = 0.2f;
+                    yOffset = 0.1f;
+                    xSize = 0.3f;
+                    ySize = 0.75f;
+                }
+                break;
+            case 19: // Hazmat Punch
+                {
+                    xOffset = 0.35f;
+                    yOffset = 0;
+                    xSize = 0.4f;
+                    ySize = 0.6f;
+                }
+                break;
+            case 20: // Shroom Kick
+                {
+                    xOffset = 0;
+                    yOffset = 0;
+                    xSize = 1;
+                    ySize = 1;
+                }
+                break;
+            case 21: // Shroom Spore
+                {
+                    xOffset = 0;
+                    yOffset = 0;
+                    xSize = 1;
+                    ySize = 1;
+                }
+                break;
+            case 22: // BB-Hands Kick
+                {
+                    xOffset = 0;
+                    yOffset = 0;
+                    xSize = 1;
+                    ySize = 1;
+                }
+                break;
+            case 23: // BB-Hands Fire
+                {
+                    xOffset = 0;
+                    yOffset = 0;
+                    xSize = 1;
+                    ySize = 1;
+                }
+                break;
+            case 24: // BB-Hands Slam
+                {
+                    xOffset = 0;
+                    yOffset = 0;
+                    xSize = 1;
+                    ySize = 1;
+                }
+                break;
             default:
                 {
                     xOffset = 0;

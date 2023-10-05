@@ -269,6 +269,7 @@ MonoBehaviour:
   speed: 3
   gm: {fileID: 0}
   hitBox: {fileID: 3632757592728418379}
+  portalGem: {fileID: 5919554944848292073, guid: cc39cd2e0ae50e641b67add252a14afb, type: 3}
   walkSprites:
   - {fileID: 21300000, guid: e3a3da979c614d3488d15ccf9824ee02, type: 3}
   - {fileID: 21300000, guid: ee6ccfdd64999ce4b85746596aec45c0, type: 3}

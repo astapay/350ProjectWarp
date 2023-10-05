@@ -12,6 +12,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Transactions;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -23,6 +24,7 @@ public class PlayerController : FighterController
     // Variables for input from the user
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private PlayerInput playerInput;
+    [SerializeField] private GameManager gm;
     private InputAction move;
     private InputAction jump;
     private InputAction crouch;
@@ -35,6 +37,8 @@ public class PlayerController : FighterController
     [SerializeField] private float groundedSpeed;
     [SerializeField] private float airSpeed;
 
+    private int gemCount;
+
     // Bool values that will determine what the
     // character can or can't do
     private bool facingRight;
@@ -46,6 +50,8 @@ public class PlayerController : FighterController
     private bool isCrouching;
     private bool isAttacking;
     private bool isGrounded;
+    private bool doneWithEntrance;
+    private bool exitStarted;
 
     // Attack-related information
     // Includes out hitbox, hurtbox, and array of Attacks
@@ -61,11 +67,13 @@ public class PlayerController : FighterController
     private int currentSprite;
 
     // Movement/misc. sprites
+    [SerializeField] private Sprite[] entranceSprites;
     [SerializeField] private Sprite[] walkSprites;
     [SerializeField] private Sprite[] jumpSprites;
     [SerializeField] private Sprite[] fallSprites;
     [SerializeField] private Sprite[] crouchSprites;
     [SerializeField] private Sprite[] deathSprites;
+    [SerializeField] private Sprite[] exitSprites;
 
     // Normal attack sprites
     [SerializeField] private Sprite[] standNSprites;
@@ -83,7 +91,6 @@ public class PlayerController : FighterController
     [SerializeField] private Sprite[] standSSprites;
     [SerializeField] private Sprite[] crouchSSprites;
     [SerializeField] private Sprite[] forwardSSprites;
-    [SerializeField] private Sprite[] backSSprites;
 
     // <summary>
     // Start is called before the first frame update
@@ -136,10 +143,10 @@ public class PlayerController : FighterController
         recoveryFrameCounter = 0;
 
         // Start the sprite counter
-        currentSprite = 0;
+        currentSprite = -1;
 
         // Initialize superclass variables
-        hp = 25;
+        hp = 50;
         hitstunFrames = 0;
         saveTransform = transform.position;
         transformSaved = false;
@@ -154,120 +161,161 @@ public class PlayerController : FighterController
     // <summary>
     void Update()
     {
-        // Check to see if we fall too far off of the map
-        // (This is possible at only one point of the level)
-        if (transform.position.y < -4)
+        if (exitStarted)
         {
-            transform.position = new Vector3(14, 1, 0);
-        }
+            currentSprite++;
 
-        // Movement if statements
-        if ((isMoving && !isAttacking) || (!isGrounded && isAttacking))
-        {
-            // We can move, generally speaking
-            // We need our direction and current Y velocity
-            float moveDir = move.ReadValue<float>();
-            float currentY = gameObject.GetComponent<Rigidbody2D>().velocity.y;
-
-            // Check to see if we can move in the inputted direction
-            if ((canMoveLeft && moveDir < 0) || (canMoveRight && moveDir > 0))
+            if (currentSprite < exitSprites.Length)
             {
-                // Check to see if we are in the air or not
-                // This determines the applicable speed
-                if (isGrounded)
+                Sprite s = exitSprites[currentSprite];
+                gameObject.GetComponent<SpriteRenderer>().sprite = s;
+            }
+            else
+            {
+                gm.FreezeTime(30);
+                Application.Quit();
+                EditorApplication.Exit(0);
+            }
+        }
+        else if (doneWithEntrance)
+        {
+            // Check to see if we fall too far off of the map
+            // (This is possible at only one point of the level)
+            if (transform.position.y < -4)
+            {
+                transform.position = new Vector3(14, 1, 0);
+            }
+
+            if (hitstunFrames <= 0)
+            {
+                // Movement if statements
+                if ((isMoving && !isAttacking) || (!isGrounded && isAttacking))
                 {
-                    gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(moveDir * groundedSpeed, currentY);
+                    // We can move, generally speaking
+                    // We need our direction and current Y velocity
+                    float moveDir = move.ReadValue<float>();
+                    float currentY = gameObject.GetComponent<Rigidbody2D>().velocity.y;
+
+                    // Check to see if we can move in the inputted direction
+                    if ((canMoveLeft && moveDir < 0) || (canMoveRight && moveDir > 0))
+                    {
+                        // Check to see if we are in the air or not
+                        // This determines the applicable speed
+                        if (isGrounded)
+                        {
+                            gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(moveDir * groundedSpeed, currentY);
+                        }
+                        else
+                        {
+                            gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(moveDir * airSpeed, currentY);
+                        }
+                    }
                 }
                 else
                 {
-                    gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(moveDir * airSpeed, currentY);
+                    // We are not trying to move
+                    // Still, we must fall at a constant rate
+
+                    float currentY = gameObject.GetComponent<Rigidbody2D>().velocity.y;
+                    gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(0, currentY);
                 }
+
+                // Now, we handle our attack if we are indeed attacking
+                // Reduce our startup
+                startupFrameCounter--;
+
+                // If startup is over, we begin drawing the hitbox
+                if (startupFrameCounter == 0)
+                {
+                    hitBox.StopHitBox();
+
+                    if (attackType != 15)
+                    {
+                        // Begin drawing the hitbox for the attack
+                        hitBox.StartHitBox(attackType, facingRight, attacks[attackType].damage,
+                            attacks[attackType].hitstun, attacks[attackType].knockback);
+                    }
+
+                    // Set our active frame counter to keep track of
+                    // how long the hitbox exists for
+                    activeFrameCounter = (attacks[attackType].activeFrames + 1);
+
+                    //This line is used for debugging hitbox positions
+                    //EditorApplication.isPaused = true;
+                }
+
+                // Reduce our active frames
+                activeFrameCounter--;
+
+                if (attackType != 0 && activeFrameCounter == attacks[attackType].activeFrames - 1)
+                {
+                    canAttack = true;
+                }
+
+                // If active frames are over, we must stop drawing the hitbox
+                if (activeFrameCounter == 0)
+                {
+                    if (attackType == 13)
+                    {
+                        UndoAdjustTransform();
+                    }
+
+                    // Stop drawing the hitbox
+                    hitBox.StopHitBox();
+
+                    // Set our recovery frame counter to keep track of
+                    // our end lag (assuming that we didn't cancel the attack)
+                    recoveryFrameCounter = (attacks[attackType].recoveryFrames + 1);
+                }
+
+                // Reduce our recovery frames
+                recoveryFrameCounter--;
+
+                // If we are done with recovery, then we must be sure our
+                // RigidBody2D has the correct constraints
+                // (They are changed when we perform a special move)
+                if (recoveryFrameCounter == 0)
+                {
+                    // Reset the RigidBody2D constraints
+                    gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeRotation;
+
+                    if (attackType >= 1 && attackType <= 3 || attackType == 7 || attackType == 15)
+                    {
+                        UndoAdjustTransform();
+                    }
+
+                    canAttack = true;
+                    isAttacking = false;
+                    attackType = 0;
+                    nChain = 0;
+                }
+
+                // Begin the special effect of an attack, if applicable
+                SpecialStart();
             }
+            else
+            {
+                hitstunFrames--;
+            }
+            
+            // Update our current animation, if there is one playing
+            UpdateAnimation();
         }
         else
         {
-            // We are not trying to move
-            // Still, we must fall at a constant rate
+            currentSprite++;
 
-            float currentY = gameObject.GetComponent<Rigidbody2D>().velocity.y;
-            gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(0, currentY);
-        }
-
-        // Now, we handle our attack if we are indeed attacking
-        // Reduce our startup
-        startupFrameCounter--;
-
-        // If startup is over, we begin drawing the hitbox
-        if (startupFrameCounter == 0)
-        {
-            hitBox.StopHitBox();
-
-            if (attackType != 15)
+            if (currentSprite < entranceSprites.Length)
             {
-                // Begin drawing the hitbox for the attack
-                hitBox.StartHitBox(attackType, facingRight, attacks[attackType].hitstun,
-                    attacks[attackType].damage, attacks[attackType].knockback);
+                Sprite s = entranceSprites[currentSprite];
+                gameObject.GetComponent<SpriteRenderer>().sprite = s;
             }
-
-            // Set our active frame counter to keep track of
-            // how long the hitbox exists for
-            activeFrameCounter = (attacks[attackType].activeFrames + 1);
-
-            //This line is used for debugging hitbox positions
-            //EditorApplication.isPaused = true;
-        }
-
-        // Reduce our active frames
-        activeFrameCounter--;
-
-        if (attackType != 0 && activeFrameCounter == attacks[attackType].activeFrames - 1)
-        {
-            canAttack = true;
-        }
-
-        // If active frames are over, we must stop drawing the hitbox
-        if (activeFrameCounter == 0)
-        {
-            if (attackType == 13)
+            else
             {
-                UndoAdjustTransform();
+                doneWithEntrance = true;
+                currentSprite = -1;
             }
-
-            // Stop drawing the hitbox
-            hitBox.StopHitBox();
-
-            // Set our recovery frame counter to keep track of
-            // our end lag (assuming that we didn't cancel the attack)
-            recoveryFrameCounter = (attacks[attackType].recoveryFrames + 1);
         }
-
-        // Reduce our recovery frames
-        recoveryFrameCounter--;
-
-        // If we are done with recovery, then we must be sure our
-        // RigidBody2D has the correct constraints
-        // (They are changed when we perform a special move)
-        if (recoveryFrameCounter == 0)
-        {
-            // Reset the RigidBody2D constraints
-            gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeRotation;
-
-            if(attackType >= 1 && attackType <= 3 || attackType == 7 || attackType == 15)
-            {
-                UndoAdjustTransform();
-            }
-
-            canAttack = true;
-            isAttacking = false;
-            attackType = 0;
-            nChain = 0;
-        }
-
-        // Update our current animation, if there is one playing
-        UpdateAnimation();
-
-        // Begin the special effect of an attack, if applicable
-        SpecialStart();
     }
 
     // <summary>
@@ -287,118 +335,22 @@ public class PlayerController : FighterController
         // Temporarily disable the Animator for the idle animation
         gameObject.GetComponent<Animator>().enabled = false;
 
-        // First, check to see if we must play an attacking animation
-        if (isAttacking)
+        if (hitstunFrames <= 0)
         {
-            // Switch on the global variable attackType
-            // to determine which attack to display
-            switch (attackType)
+            transform.rotation = Quaternion.identity;
+
+            // First, check to see if we must play an attacking animation
+            if (isAttacking)
             {
-                case 1: //5N
-                    {
-                        currentSprite %= standNSprites.Length;
-                        s = standNSprites[currentSprite];
+                // Switch on the global variable attackType
+                // to determine which attack to display
+                switch (attackType)
+                {
+                    case 1: //5N
+                        {
+                            currentSprite %= standNSprites.Length;
+                            s = standNSprites[currentSprite];
 
-                        if (facingRight)
-                        {
-                            AdjustTransform(0.155f, 0);
-                        }
-                        else
-                        {
-                            AdjustTransform(-0.155f, 0);
-                        }
-                    }
-                    break;
-                case 2: //5NN
-                case 8: //6NN
-                    {
-                        currentSprite %= standNNSprites.Length;
-                        s = standNNSprites[currentSprite];
-
-                        if (facingRight)
-                        {
-                            AdjustTransform(0.155f, 0);
-                        }
-                        else
-                        {
-                            AdjustTransform(-0.155f, 0);
-                        }
-                    }
-                    break;
-                case 3: //5NNN
-                case 9: //6NNN
-                    {
-                        currentSprite %= standNNNSprites.Length;
-                        s = standNNNSprites[currentSprite];
-
-                        if (facingRight)
-                        {
-                            AdjustTransform(0.155f, 0);
-                        }
-                        else
-                        {
-                            AdjustTransform(-0.155f, 0);
-                        }
-                    }
-                    break;
-                case 4: //2N
-                    {
-                        currentSprite %= crouchNSprites.Length;
-                        s = crouchNSprites[currentSprite];
-                    }
-                    break;
-                case 5: //2NN
-                    {
-                        currentSprite %= crouchNNSprites.Length;
-                        s = crouchNNSprites[currentSprite];
-                    }
-                    break;
-                case 6: //2NNN
-                    {
-                        currentSprite %= crouchNNNSprites.Length;
-                        s = crouchNNNSprites[currentSprite];
-                    }
-                    break;
-                case 7: //6N
-                    {
-                        currentSprite %= forwardNSprites.Length;
-                        s = forwardNSprites[currentSprite];
-
-                        if (facingRight)
-                        {
-                            AdjustTransform(0.155f, 0);
-                        }
-                        else
-                        {
-                            AdjustTransform(-0.155f, 0);
-                        }
-                    }
-                    break;
-                case 10: //j.N
-                    {
-                        currentSprite %= airNSprites.Length;
-                        s = airNSprites[currentSprite];
-                    }
-                    break;
-                case 11: //j.NN
-                    {
-                        currentSprite %= airNNSprites.Length;
-                        s = airNNSprites[currentSprite];
-                    }
-                    break;
-                case 12: //j.NNN/j.6N
-                    {
-                        currentSprite %= airNNNSprites.Length;
-                        s = airNNNSprites[currentSprite];
-                    }
-                    break;
-                case 13: //5S
-                    {
-                        currentSprite %= standSSprites.Length;
-                        s = standSSprites[currentSprite];
-
-                        if (recoveryFrameCounter < 0)
-                        {
                             if (facingRight)
                             {
                                 AdjustTransform(0.155f, 0);
@@ -408,99 +360,205 @@ public class PlayerController : FighterController
                                 AdjustTransform(-0.155f, 0);
                             }
                         }
-                    }
-                    break;
-                case 14: //2S
-                    {
-                        currentSprite %= crouchSSprites.Length;
-                        s = crouchSSprites[currentSprite];
-                    }
-                    break;
-                case 15: //6S
-                    {
-                        currentSprite %= forwardSSprites.Length;
-                        s = forwardSSprites[currentSprite];
-
-                        if (facingRight)
+                        break;
+                    case 2: //5NN
+                    case 8: //6NN
                         {
-                            AdjustTransform(0.155f, 0);
+                            currentSprite %= standNNSprites.Length;
+                            s = standNNSprites[currentSprite];
+
+                            if (facingRight)
+                            {
+                                AdjustTransform(0.155f, 0);
+                            }
+                            else
+                            {
+                                AdjustTransform(-0.155f, 0);
+                            }
                         }
-                        else
+                        break;
+                    case 3: //5NNN
+                    case 9: //6NNN
                         {
-                            AdjustTransform(-0.155f, 0);
+                            currentSprite %= standNNNSprites.Length;
+                            s = standNNNSprites[currentSprite];
+
+                            if (facingRight)
+                            {
+                                AdjustTransform(0.155f, 0);
+                            }
+                            else
+                            {
+                                AdjustTransform(-0.155f, 0);
+                            }
                         }
-                    }
-                    break;
-                // If we somehow find a different attack,
-                // Simply play the Animator again
-                default:
-                    gameObject.GetComponent<Animator>().enabled = true;
-                    break;
-            }
-        }
-        // Next, we check for the jumping animation
-        else if (!isGrounded)
-        {
-            // We need the Y velocity to see if we are jumping or falling
-            float yVelo = gameObject.GetComponent<Rigidbody2D>().velocity.y;
+                        break;
+                    case 4: //2N
+                        {
+                            currentSprite %= crouchNSprites.Length;
+                            s = crouchNSprites[currentSprite];
+                        }
+                        break;
+                    case 5: //2NN
+                        {
+                            currentSprite %= crouchNNSprites.Length;
+                            s = crouchNNSprites[currentSprite];
+                        }
+                        break;
+                    case 6: //2NNN
+                        {
+                            currentSprite %= crouchNNNSprites.Length;
+                            s = crouchNNNSprites[currentSprite];
+                        }
+                        break;
+                    case 7: //6N
+                        {
+                            currentSprite %= forwardNSprites.Length;
+                            s = forwardNSprites[currentSprite];
 
-            // Check to see if we are jumping or falling
-            if (yVelo > 0)
-            {
-                // We are jumping
+                            if (facingRight)
+                            {
+                                AdjustTransform(0.155f, 0);
+                            }
+                            else
+                            {
+                                AdjustTransform(-0.155f, 0);
+                            }
+                        }
+                        break;
+                    case 10: //j.N
+                        {
+                            currentSprite %= airNSprites.Length;
+                            s = airNSprites[currentSprite];
+                        }
+                        break;
+                    case 11: //j.NN
+                        {
+                            currentSprite %= airNNSprites.Length;
+                            s = airNNSprites[currentSprite];
+                        }
+                        break;
+                    case 12: //j.NNN/j.6N
+                        {
+                            currentSprite %= airNNNSprites.Length;
+                            s = airNNNSprites[currentSprite];
+                        }
+                        break;
+                    case 13: //5S
+                        {
+                            currentSprite %= standSSprites.Length;
+                            s = standSSprites[currentSprite];
 
-                // So that we don't seem to jump again in midair,
-                // we will continuously play the last animation if we
-                // are still moving up
-                if(currentSprite >= jumpSprites.Length)
-                {
-                    currentSprite = jumpSprites.Length - 1;
+                            if (recoveryFrameCounter < 0)
+                            {
+                                if (facingRight)
+                                {
+                                    AdjustTransform(0.155f, 0);
+                                }
+                                else
+                                {
+                                    AdjustTransform(-0.155f, 0);
+                                }
+                            }
+                        }
+                        break;
+                    case 14: //2S
+                        {
+                            currentSprite %= crouchSSprites.Length;
+                            s = crouchSSprites[currentSprite];
+                        }
+                        break;
+                    case 15: //6S
+                        {
+                            currentSprite %= forwardSSprites.Length;
+                            s = forwardSSprites[currentSprite];
+
+                            if (facingRight)
+                            {
+                                AdjustTransform(0.155f, 0);
+                            }
+                            else
+                            {
+                                AdjustTransform(-0.155f, 0);
+                            }
+                        }
+                        break;
+                    // If we somehow find a different attack,
+                    // Simply play the Animator again
+                    default:
+                        gameObject.GetComponent<Animator>().enabled = true;
+                        break;
                 }
-
-                s = jumpSprites[currentSprite];
             }
+            // Next, we check for the jumping animation
+            else if (!isGrounded)
+            {
+                // We need the Y velocity to see if we are jumping or falling
+                float yVelo = gameObject.GetComponent<Rigidbody2D>().velocity.y;
+
+                // Check to see if we are jumping or falling
+                if (yVelo > 0)
+                {
+                    // We are jumping
+
+                    // So that we don't seem to jump again in midair,
+                    // we will continuously play the last animation if we
+                    // are still moving up
+                    if (currentSprite >= jumpSprites.Length)
+                    {
+                        currentSprite = jumpSprites.Length - 1;
+                    }
+
+                    s = jumpSprites[currentSprite];
+                }
+                else
+                {
+                    //We are falling
+
+                    // So that we don't seem to fall off invisible platforms,
+                    // we will continuously play the last animation if we
+                    // are still moving down
+                    if (currentSprite >= fallSprites.Length)
+                    {
+                        currentSprite = fallSprites.Length - 1;
+                    }
+
+                    s = fallSprites[currentSprite];
+                }
+            }
+            // Next, crouching sprites
+            else if (isCrouching)
+            {
+                currentSprite %= crouchSprites.Length;
+                s = crouchSprites[currentSprite];
+            }
+            // Next, walking
+            else if (isMoving)
+            {
+                currentSprite %= walkSprites.Length;
+                s = walkSprites[currentSprite];
+
+                // We also need to update which direction we are looking
+                if (facingRight)
+                {
+                    gameObject.GetComponent<SpriteRenderer>().flipX = false;
+                }
+                else
+                {
+                    gameObject.GetComponent<SpriteRenderer>().flipX = true;
+                }
+            }
+            // Finally, if the rest fail,
+            // we turn on the Animator for the idle animation
             else
             {
-                //We are falling
-
-                // So that we don't seem to fall off invisible platforms,
-                // we will continuously play the last animation if we
-                // are still moving down
-                if (currentSprite >= fallSprites.Length)
-                {
-                    currentSprite = fallSprites.Length - 1;
-                }
-
-                s = fallSprites[currentSprite];
+                gameObject.GetComponent<Animator>().enabled = true;
             }
         }
-        // Next, crouching sprites
-        else if (isCrouching)
-        {
-            currentSprite %= crouchSprites.Length;
-            s = crouchSprites[currentSprite];
-        }
-        // Next, walking
-        else if (isMoving)
-        {
-            currentSprite %= walkSprites.Length;
-            s = walkSprites[currentSprite];
-
-            // We also need to update which direction we are looking
-            if (facingRight)
-            {
-                gameObject.GetComponent<SpriteRenderer>().flipX = false;
-            }
-            else
-            {
-                gameObject.GetComponent<SpriteRenderer>().flipX = true;
-            }
-        }
-        // Finally, if the rest fail,
-        // we turn on the Animator for the idle animation
         else
         {
-            gameObject.GetComponent<Animator>().enabled = true;
+            s = deathSprites[7];
+            hitstunFrames--;
         }
 
         // Apply the chosen sprite to the SpriteRenderer
@@ -633,6 +691,11 @@ public class PlayerController : FighterController
         }
     }
 
+    public void IncreaseGems()
+    {
+        gemCount++;
+    }
+
     // <summary>
     // The handler for beginning movement
     // </summary>
@@ -709,13 +772,6 @@ public class PlayerController : FighterController
         if (hitstunFrames <= 0)
         {
             isCrouching = true;
-
-            // We want to be able to crouch
-            // as long as we are on the ground
-            if (isGrounded)
-            {
-                
-            }
         }
     }
 
@@ -790,7 +846,12 @@ public class PlayerController : FighterController
     // <param name="obj"> information as to what triggered this action </param>
     private void Handle_Special(InputAction.CallbackContext obj)
     {
-        if (hitstunFrames <= 0)
+        if (gemCount >= 3)
+        {
+            exitStarted = true;
+            currentSprite = -1;
+        }
+        else if (hitstunFrames <= 0)
         {
             if (canAttack)
             {

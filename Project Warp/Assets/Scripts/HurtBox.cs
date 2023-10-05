@@ -14,8 +14,6 @@ using UnityEngine;
 
 public class HurtBox : MonoBehaviour
 {
-    [SerializeField] private GameManager gm;
-
     // <summary>
     // Handles any damage taken from a collision with a hitbox
     // The code in this method is temporary
@@ -25,9 +23,12 @@ public class HurtBox : MonoBehaviour
     {
         FighterController parent = GetComponentInParent<FighterController>();
 
-        parent.ReduceHP(damage);
-        parent.ApplyHitstun(hitstun);
-        parent.ApplyKnockback(knockback);
+        if (parent != null)
+        {
+            parent.ReduceHP(damage);
+            parent.ApplyHitstun(hitstun);
+            parent.ApplyKnockback(knockback);
+        }
     }
 
     public void TurnOff()
@@ -84,7 +85,5 @@ public class HurtBox : MonoBehaviour
 
         //Handle our damage
         GetHit(hitBox.getDamage(), hitBox.getHitstun(), hitBox.getKnockback());
-
-        gm.FreezeTime(10);
     }
 }

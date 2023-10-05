@@ -36,7 +36,7 @@ Transform:
   - {fileID: 4420416059680933868}
   - {fileID: 7357941295651414885}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &6267502201374078745
 SpriteRenderer:
@@ -178,6 +178,7 @@ MonoBehaviour:
   speed: 3
   gm: {fileID: 0}
   hitBox: {fileID: 3527447710405262842}
+  portalGem: {fileID: 5919554944848292073, guid: cc39cd2e0ae50e641b67add252a14afb, type: 3}
   walkSprites:
   - {fileID: 21300000, guid: d0cd4c7dbea380b4e9eec6bafb3cd886, type: 3}
   - {fileID: 21300000, guid: b878396e6c2161844b543c5e123466ae, type: 3}

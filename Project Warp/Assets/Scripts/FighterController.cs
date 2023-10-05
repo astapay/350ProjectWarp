@@ -196,60 +196,60 @@ public class FighterController : MonoBehaviour
         attacks[17].knockback = new Vector2(6, 0.3f);
 
         //Hazmat Whack
-        attacks[18].startupFrames = 0;
-        attacks[18].activeFrames = 0;
-        attacks[18].recoveryFrames = 0;
-        attacks[18].damage = 0;
-        attacks[18].hitstun = 0;
+        attacks[18].startupFrames = 8;
+        attacks[18].activeFrames = 2;
+        attacks[18].recoveryFrames = 1;
+        attacks[18].damage = 1;
+        attacks[18].hitstun = 8;
         attacks[18].knockback = Vector2.zero;
 
         //Hazmat Punch
-        attacks[19].startupFrames = 0;
-        attacks[19].activeFrames = 0;
-        attacks[19].recoveryFrames = 0;
-        attacks[19].damage = 0;
-        attacks[19].hitstun = 0;
-        attacks[19].knockback = Vector2.zero;
+        attacks[19].startupFrames = 8;
+        attacks[19].activeFrames = 2;
+        attacks[19].recoveryFrames = 6;
+        attacks[19].damage = 5;
+        attacks[19].hitstun = 20;
+        attacks[19].knockback = new Vector2(6, 0.3f);
 
         //Shroom Kick
-        attacks[20].startupFrames = 0;
-        attacks[20].activeFrames = 0;
-        attacks[20].recoveryFrames = 0;
-        attacks[20].damage = 0;
-        attacks[20].hitstun = 0;
+        attacks[20].startupFrames = 5;
+        attacks[20].activeFrames = 3;
+        attacks[20].recoveryFrames = 3;
+        attacks[20].damage = 1;
+        attacks[20].hitstun = 5;
         attacks[20].knockback = Vector2.zero;
 
         //Shroom Spore
-        attacks[21].startupFrames = 0;
-        attacks[21].activeFrames = 0;
-        attacks[21].recoveryFrames = 0;
+        attacks[21].startupFrames = 8;
+        attacks[21].activeFrames = 1;
+        attacks[21].recoveryFrames = 3;
         attacks[21].damage = 0;
-        attacks[21].hitstun = 0;
+        attacks[21].hitstun = 40;
         attacks[21].knockback = Vector2.zero;
 
         //BB-Hands Kick
-        attacks[22].startupFrames = 0;
-        attacks[22].activeFrames = 0;
-        attacks[22].recoveryFrames = 0;
-        attacks[22].damage = 0;
-        attacks[22].hitstun = 0;
+        attacks[22].startupFrames = 5;
+        attacks[22].activeFrames = 4;
+        attacks[22].recoveryFrames = 2;
+        attacks[22].damage = 1;
+        attacks[22].hitstun = 5;
         attacks[22].knockback = Vector2.zero;
 
         //BB-Hands Fire
-        attacks[23].startupFrames = 0;
-        attacks[23].activeFrames = 0;
-        attacks[23].recoveryFrames = 0;
-        attacks[23].damage = 0;
-        attacks[23].hitstun = 0;
-        attacks[23].knockback = Vector2.zero;
+        attacks[23].startupFrames = 12;
+        attacks[23].activeFrames = 1;
+        attacks[23].recoveryFrames = 4;
+        attacks[23].damage = 3;
+        attacks[23].hitstun = 20;
+        attacks[23].knockback = new Vector2(0.3f, 0.3f);
 
         //BB-Hands Slam
-        attacks[24].startupFrames = 0;
-        attacks[24].activeFrames = 0;
-        attacks[24].recoveryFrames = 0;
-        attacks[24].damage = 0;
-        attacks[24].hitstun = 0;
-        attacks[24].knockback = Vector2.zero;
+        attacks[24].startupFrames = 7;
+        attacks[24].activeFrames = 3;
+        attacks[24].recoveryFrames = 10;
+        attacks[24].damage = 7;
+        attacks[24].hitstun = 40;
+        attacks[24].knockback = new Vector2(6, 0.3f);
     }
 
     // <summary>
