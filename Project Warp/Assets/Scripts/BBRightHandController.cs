@@ -3,24 +3,19 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class BBHandsController : FighterController
+public class BBRightHandController : FighterController
 {
-    [SerializeField] private GameManager gm;
+    [SerializeField] private int speed;
     [SerializeField] private HitBox hitBox;
-    [SerializeField] private GameObject portalGem;
+    [SerializeField] private GameManager gm;
     private GameObject pw350;
-
-    [SerializeField] private GameObject leftHand;
-    [SerializeField] private GameObject rightHand;
 
     private bool facingRight;
     private bool canAttack;
     private bool isAttacking;
-    private bool gemSpawned;
 
     private int currentSprite;
-    [SerializeField] private Sprite[] kickSprites;
-    [SerializeField] private Sprite[] deathSprites;
+    [SerializeField] private Sprite[] slamSprites;
 
     private int attackType;
     private int startupFrameCounter;
@@ -39,7 +34,6 @@ public class BBHandsController : FighterController
         facingRight = true;
         canAttack = true;
         isAttacking = false;
-        gemSpawned = false;
 
         startupFrameCounter = 0;
         activeFrameCounter = 0;
@@ -58,6 +52,8 @@ public class BBHandsController : FighterController
     // Update is called once per frame
     void Update()
     {
+        hitstunFrames = GetComponentInParent<BBHandsController>().GetHitstunFrames();
+
         if (actionFrames <= 0)
         {
             waitFrames = Random.Range(1, 90);
@@ -73,11 +69,7 @@ public class BBHandsController : FighterController
             attackType = 0;
         }
 
-        if (hp == 0)
-        {
-            DeathAnimation();
-        }
-        else if (waitFrames <= 0 && hitstunFrames <= 0)
+        if (waitFrames <= 0 && hitstunFrames <= 0)
         {
             float distFromPW = gm.FindDistance(this.gameObject, pw350);
 
@@ -85,43 +77,40 @@ public class BBHandsController : FighterController
             {
                 if (canAttack && distFromPW < 1)
                 {
-                    StartKickAttack();
+                    StartSlamAttack();
                 }
                 else if (!isAttacking)
                 {
-                    float currentY = gameObject.GetComponent<Rigidbody2D>().velocity.y;
-                    gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(0, currentY);
+                    float xChange = pw350.transform.position.x - transform.position.x;
+                    float yChange = pw350.transform.position.y - transform.position.y;
 
-                    if (pw350.transform.position.x < transform.position.x)
+                    float mag = Mathf.Sqrt(xChange * xChange + yChange * yChange);
+
+                    Vector2 temp1 = new Vector2(xChange / mag, yChange / mag);
+                    Vector2 temp2 = new Vector2(speed * temp1.x, speed * temp1.y);
+
+                    GetComponent<Rigidbody2D>().velocity = temp2;
+
+                    if (temp2.x < 0)
                     {
-                        if (facingRight)
-                        {
-                            InvertHurtboxes();
-                            facingRight = false;
-                        }
+                        facingRight = false;
                     }
-                    else if (pw350.transform.position.x > transform.position.x)
+                    else if (temp2.x > 0)
                     {
-                        if (!facingRight)
-                        {
-                            InvertHurtboxes();
-                            facingRight = true;
-                        }
+                        facingRight = true;
                     }
                 }
             }
             else
             {
-                float currentY = gameObject.GetComponent<Rigidbody2D>().velocity.y;
-                gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(0, currentY);
+                gameObject.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
             }
 
             actionFrames--;
         }
         else
         {
-            float currentY = gameObject.GetComponent<Rigidbody2D>().velocity.y;
-            gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(0, currentY);
+            gameObject.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
 
             hitstunFrames--;
         }
@@ -155,9 +144,6 @@ public class BBHandsController : FighterController
         // If active frames are over, we must stop drawing the hitbox
         if (activeFrameCounter == 0)
         {
-            // Stop drawing the hitbox
-            hitBox.StopHitBox();
-
             // Set our recovery frame counter to keep track of
             // our end lag (assuming that we didn't cancel the attack)
             recoveryFrameCounter = (attacks[attackType].recoveryFrames + 1);
@@ -189,14 +175,16 @@ public class BBHandsController : FighterController
             {
                 switch (attackType)
                 {
-                    case 22:
+                    case 24:
                         {
-                            currentSprite %= kickSprites.Length;
-                            s = kickSprites[currentSprite];
+                            currentSprite %= slamSprites.Length;
+                            s = slamSprites[currentSprite];
                         }
                         break;
                     default:
-                        gameObject.GetComponent<Animator>().enabled = true;
+                        {
+                            gameObject.GetComponent<Animator>().enabled = true;
+                        }
                         break;
                 }
             }
@@ -215,50 +203,18 @@ public class BBHandsController : FighterController
                 gameObject.GetComponent<Animator>().enabled = true;
             }
         }
-        else
-        {
-            s = deathSprites[4];
-        }
 
         gameObject.GetComponent<SpriteRenderer>().sprite = s;
 
-        if (attackType == 22)
+        if (attackType == 24)
         {
             EditorApplication.isPaused = true;
         }
     }
 
-    private void DeathAnimation()
+    private void StartSlamAttack()
     {
-        // Disable its idle animation, pushbox, and RigidBody
-        gameObject.GetComponent<Animator>().enabled = false;
-        gameObject.GetComponent<BoxCollider2D>().enabled = false;
-        gameObject.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Static;
-
-        // Increment our sprite tracker
-        currentSprite++;
-
-        // If we are going to go out of bounds in our sprite vector,
-        // we are going to correct ourselves
-        if (currentSprite >= deathSprites.Length)
-        {
-            currentSprite = deathSprites.Length - 1;
-
-            if (!gemSpawned)
-            {
-                Instantiate(portalGem, transform.position, Quaternion.identity);
-
-                gemSpawned = true;
-            }
-        }
-
-        // Render the updated sprite through the SpriteRenderer
-        gameObject.GetComponent<SpriteRenderer>().sprite = deathSprites[currentSprite];
-    }
-
-    private void StartKickAttack()
-    {
-        attackType = 22;
+        attackType = 24;
         startupFrameCounter = attacks[attackType].startupFrames;
         activeFrameCounter = 0;
         recoveryFrameCounter = 0;
@@ -266,25 +222,5 @@ public class BBHandsController : FighterController
         currentSprite = -1;
         canAttack = false;
         isAttacking = true;
-    }
-
-    public int GetHitstunFrames()
-    {
-        return hitstunFrames;
-    }
-
-    // <summary>
-    // Draws the HUND's pushbox in Scene View
-    // Very useful for debugging
-    // </summary>
-    private void OnDrawGizmos()
-    {
-        // We will simply draw a cube around the Dummy's pushbox
-        Gizmos.color = Color.white;
-
-        Vector3 boxPos = GetComponent<BoxCollider2D>().bounds.center;
-        Vector3 boxSize = GetComponent<BoxCollider2D>().size;
-
-        Gizmos.DrawWireCube(boxPos, boxSize);
     }
 }

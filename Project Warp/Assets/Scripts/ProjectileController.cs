@@ -8,11 +8,19 @@ public class ProjectileController : MonoBehaviour
     [SerializeField] private HitBox hitBox;
     [SerializeField] private int speed;
     public bool movingRight;
+    public bool pwProjectile;
 
     // Start is called before the first frame update
     void Start()
     {
-        hitBox.StartHitBox(15, movingRight, 3, 7, new Vector2(0.3f, 0.3f));
+        if (pwProjectile)
+        {
+            hitBox.StartHitBox(15, movingRight, 3, 7, new Vector2(0.3f, 0.3f));
+        }
+        else
+        {
+            hitBox.StartHitBox(23, movingRight, 3, 20, new Vector2(0.3f, 0.3f));
+        }
     }
 
     // Update is called once per frame

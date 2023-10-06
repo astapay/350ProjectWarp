@@ -172,10 +172,10 @@ public class HitBox : MonoBehaviour
                 break;
             case 20: // Shroom Kick
                 {
-                    xOffset = 0;
-                    yOffset = 0;
-                    xSize = 1;
-                    ySize = 1;
+                    xOffset = 0.3f;
+                    yOffset = -0.25f;
+                    xSize = 0.35f;
+                    ySize = 0.25f;
                 }
                 break;
             case 21: // Shroom Spore
@@ -183,31 +183,31 @@ public class HitBox : MonoBehaviour
                     xOffset = 0;
                     yOffset = 0;
                     xSize = 1;
-                    ySize = 1;
+                    ySize = 0.85f;
                 }
                 break;
             case 22: // BB-Hands Kick
                 {
                     xOffset = 0;
-                    yOffset = 0;
-                    xSize = 1;
-                    ySize = 1;
+                    yOffset = -0.7f;
+                    xSize = 0.45f;
+                    ySize = 0.55f;
                 }
                 break;
             case 23: // BB-Hands Fire
                 {
                     xOffset = 0;
-                    yOffset = 0;
-                    xSize = 1;
-                    ySize = 1;
+                    yOffset = 0.05f;
+                    xSize = 0.65f;
+                    ySize = 0.45f;
                 }
                 break;
             case 24: // BB-Hands Slam
                 {
-                    xOffset = 0;
-                    yOffset = 0;
-                    xSize = 1;
-                    ySize = 1;
+                    xOffset = 0.05f;
+                    yOffset = -0.2f;
+                    xSize = 0.7f;
+                    ySize = 0.6f;
                 }
                 break;
             default:

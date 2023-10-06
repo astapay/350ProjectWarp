@@ -82,8 +82,13 @@ public class HurtBox : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         HitBox hitBox = other.GetComponent<HitBox>();
+        GameObject parent = GetComponentInParent<FighterController>().gameObject;
+        GameObject hitBoxParent = other.GetComponentInParent<FighterController>().gameObject;
 
-        //Handle our damage
-        GetHit(hitBox.getDamage(), hitBox.getHitstun(), hitBox.getKnockback());
+        if (!parent.name.Contains("Shroom") || !hitBoxParent.name.Contains("Spore"))
+        {
+            //Handle our damage
+            GetHit(hitBox.getDamage(), hitBox.getHitstun(), hitBox.getKnockback());
+        }
     }
 }

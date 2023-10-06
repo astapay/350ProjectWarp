@@ -678,6 +678,8 @@ public class PlayerController : FighterController
 
                     GameObject pc = Instantiate(projectilePrefab, temp, Quaternion.identity);
 
+                    pc.GetComponent<ProjectileController>().pwProjectile = true;
+
                     if (facingRight)
                     {
                         pc.GetComponent<ProjectileController>().movingRight = true;

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class ShroomController : FighterController
@@ -8,6 +9,7 @@ public class ShroomController : FighterController
     [SerializeField] private GameManager gm;
     [SerializeField] private HitBox hitBox;
     [SerializeField] private GameObject portalGem;
+    [SerializeField] private GameObject spore;
     private GameObject pw350;
 
     private bool facingRight;
@@ -18,8 +20,8 @@ public class ShroomController : FighterController
 
     private int currentSprite;
     [SerializeField] private Sprite[] walkSprites;
-    [SerializeField] private Sprite[] biteSprites;
-    [SerializeField] private Sprite[] pounceSprites;
+    [SerializeField] private Sprite[] kickSprites;
+    [SerializeField] private Sprite[] sporeSprites;
     [SerializeField] private Sprite[] deathSprites;
 
     private int attackType;
@@ -86,11 +88,11 @@ public class ShroomController : FighterController
             {
                 if (canAttack && distFromPW < 1)
                 {
-                    StartBiteAttack();
+                    StartKickAttack();
                 }
                 else if (canAttack && distFromPW < 3)
                 {
-                    StartPounceAttack();
+                    StartSporeAttack();
                 }
                 else if (!isAttacking)
                 {
@@ -155,9 +157,16 @@ public class ShroomController : FighterController
         {
             hitBox.StopHitBox();
 
-            // Begin drawing the hitbox for the attack
-            hitBox.StartHitBox(attackType, facingRight, attacks[attackType].damage,
-                attacks[attackType].hitstun, attacks[attackType].knockback);
+            if (attackType != 21)
+            {
+                // Begin drawing the hitbox for the attack
+                hitBox.StartHitBox(attackType, facingRight, attacks[attackType].damage,
+                    attacks[attackType].hitstun, attacks[attackType].knockback);
+            }
+            else
+            {
+                Instantiate(spore, transform.position, Quaternion.identity);
+            }
 
             // Set our active frame counter to keep track of
             // how long the hitbox exists for
@@ -186,10 +195,7 @@ public class ShroomController : FighterController
 
         if (recoveryFrameCounter == 0)
         {
-            if (attackType == 17)
-            {
-                UndoAdjustTransform();
-            }
+            
         }
 
         UpdateAnimation();
@@ -210,32 +216,16 @@ public class ShroomController : FighterController
             {
                 switch (attackType)
                 {
-                    case 16:
+                    case 20:
                         {
-                            currentSprite %= biteSprites.Length;
-                            s = biteSprites[currentSprite];
+                            currentSprite %= kickSprites.Length;
+                            s = kickSprites[currentSprite];
                         }
                         break;
-                    case 17:
+                    case 21:
                         {
-                            currentSprite %= pounceSprites.Length;
-                            s = pounceSprites[currentSprite];
-
-                            if (startupFrameCounter > 0)
-                            {
-                                AdjustTransform(0, 0.255f);
-
-                                if (facingRight)
-                                {
-                                    transform.position = new Vector2(transform.position.x + 0.15f, transform.position.y);
-                                    saveTransform.x = transform.position.x + 0.15f;
-                                }
-                                else
-                                {
-                                    transform.position = new Vector2(transform.position.x - 0.15f, transform.position.y);
-                                    saveTransform.x = transform.position.x - 0.15f;
-                                }
-                            }
+                            currentSprite %= sporeSprites.Length;
+                            s = sporeSprites[currentSprite];
                         }
                         break;
                     default:
@@ -299,9 +289,9 @@ public class ShroomController : FighterController
         gameObject.GetComponent<SpriteRenderer>().sprite = deathSprites[currentSprite];
     }
 
-    private void StartBiteAttack()
+    private void StartKickAttack()
     {
-        attackType = 16;
+        attackType = 20;
         startupFrameCounter = attacks[attackType].startupFrames;
         activeFrameCounter = 0;
         recoveryFrameCounter = 0;
@@ -311,9 +301,9 @@ public class ShroomController : FighterController
         isAttacking = true;
     }
 
-    private void StartPounceAttack()
+    private void StartSporeAttack()
     {
-        attackType = 17;
+        attackType = 21;
         startupFrameCounter = attacks[attackType].startupFrames;
         activeFrameCounter = 0;
         recoveryFrameCounter = 0;
