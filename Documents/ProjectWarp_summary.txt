@@ -1,0 +1,14 @@
+Game Name: Project Warp
+Genre: Action/Platformer
+Description: PW-350 was a test subject all his life for the laboratory Warp Corp.
+	     Our main character has the ability to teleport across entire multiverses,
+	     and Warp Corp. wanted to use these powers for their own personal gain.
+	     Thankfully, the test subject is able to escape his captors, but they
+	     are close on his tail as they chase him down through the multiverse.
+
+Team:
+- Corey Green: Producer
+- Alex Kalscheur: Designer/Artist
+- Andrew Stapay: Designer/Programmer
+- Carl Crumer: Programmer/Artist
+- David Henvick: Programmer/Artist
